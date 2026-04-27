@@ -18,7 +18,7 @@ services:
     rootDir: backend
     dockerfilePath: ./Dockerfile
     healthCheckPath: /api/items
-    # ASPNETCORE_URLS is set in backend/entrypoint.sh from $PORT (Render-injected; often 10000, not 8080).
+    # Kestrel listen port: Program.cs sets ASPNETCORE_URLS from Render's PORT before the host starts.
     envVars:
       - key: ASPNETCORE_ENVIRONMENT
         value: Production

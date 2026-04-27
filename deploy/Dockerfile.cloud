@@ -23,8 +23,6 @@ RUN dotnet publish "KiryanaStore.API.csproj" -c Release -o /app/publish /p:UseAp
 
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
 WORKDIR /app
-COPY backend/entrypoint.sh /entrypoint.sh
-RUN sed -i 's/\r$//' /entrypoint.sh && chmod +x /entrypoint.sh
-EXPOSE 8080 10000
+EXPOSE 8080
 COPY --from=be /app/publish .
-ENTRYPOINT ["/entrypoint.sh"]
+ENTRYPOINT ["dotnet", "KiryanaStore.API.dll"]

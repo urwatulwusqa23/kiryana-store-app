@@ -7,6 +7,16 @@ using KiryanaStore.Infrastructure.Data;
 using KiryanaStore.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
 
+// Render, Railway, etc. set PORT. Kestrel must bind to that port (often 10000, not 8080).
+// Set before CreateBuilder so the host configuration picks it up.
+{
+    var port = Environment.GetEnvironmentVariable("PORT");
+    if (!string.IsNullOrEmpty(port))
+        Environment.SetEnvironmentVariable("ASPNETCORE_URLS", $"http://+:{port}");
+    else if (string.IsNullOrEmpty(Environment.GetEnvironmentVariable("ASPNETCORE_URLS")))
+        Environment.SetEnvironmentVariable("ASPNETCORE_URLS", "http://+:8080");
+}
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
