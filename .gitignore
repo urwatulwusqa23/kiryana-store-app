@@ -1,0 +1,28 @@
+# Dependencies
+node_modules/
+
+# Frontend builds
+frontend/dist/
+
+# .NET builds
+backend/**/bin/
+backend/**/obj/
+
+# Local environment files
+.env
+.env.*
+!.env.example
+frontend/.env
+frontend/.env.*
+!frontend/.env.example
+
+# IDE and OS files
+.claude/
+.vscode/
+.idea/
+backend/.vs/
+.DS_Store
+Thumbs.db
+
+# Local generated files
+submission_answers.pdf
