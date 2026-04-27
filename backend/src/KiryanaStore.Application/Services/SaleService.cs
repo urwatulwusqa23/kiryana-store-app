@@ -64,9 +64,10 @@ public class SaleService(ISaleRepository saleRepo, IItemRepository itemRepo, ICu
 
     public async Task<DashboardDto> GetDashboardAsync()
     {
+        // timestamptz parameters must be UTC; new DateTime(y,m,1) is Unspecified and breaks Npgsql.
         var now = DateTime.UtcNow;
-        var todayStart = now.Date;
-        var monthStart = new DateTime(now.Year, now.Month, 1);
+        var todayStart = new DateTime(now.Year, now.Month, now.Day, 0, 0, 0, DateTimeKind.Utc);
+        var monthStart = new DateTime(now.Year, now.Month, 1, 0, 0, 0, DateTimeKind.Utc);
 
         var todaySales = await saleRepo.GetSalesByDateRangeAsync(todayStart, now);
         var monthSales = await saleRepo.GetSalesByDateRangeAsync(monthStart, now);
