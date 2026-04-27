@@ -36,10 +36,10 @@ This project uses **.NET 8 + EF Core + Npgsql (PostgreSQL)**. **SQL Server is no
 3. Connect the GitHub repo that contains this project.
 4. Use the default **Blueprint path** `render.yaml` (at the repo root).
 5. Approve the create. Render will:
-   - Create a **Postgres** database (`kiryana_db` in the file; names use letters, digits, underscores only).
+   - Create a **Postgres** database (`kiryana-db` in the file).
    - Create a **Web Service** that builds `backend/Dockerfile` and sets **`DATABASE_URL`** from that database.
 6. Wait until the **Web Service** shows **Live** (build can take several minutes the first time).
-7. Open the service → **URL** (e.g. `https://kiryana-api.onrender.com` — Render may adjust the public hostname; use the URL shown in the dashboard).  
+7. Open the service → **URL** (e.g. `https://kiryana-api.onrender.com`).  
    - Check: `https://<that-host>/api/items` should return JSON (or `[]` right after first deploy while seeding runs).
 8. If the build fails, open **Logs** and fix (common issues: wrong `rootDir`, or Dockerfile path — this repo uses `rootDir: backend` and `dockerfilePath: ./Dockerfile`).
 
@@ -49,7 +49,7 @@ This project uses **.NET 8 + EF Core + Npgsql (PostgreSQL)**. **SQL Server is no
 
 ### Option B — Manual (Dashboard)
 
-1. **New** → **PostgreSQL** → name it (e.g. `kiryana_db` — only letters, digits, underscores) → plan **Free** → create.
+1. **New** → **PostgreSQL** → name it (e.g. `kiryana-db`) → plan **Free** → create.
 2. In the database page, copy the **Internal Database URL** (or the URL Render shows for apps in the same region). It will look like `postgres://...` or `postgresql://...`.
 3. **New** → **Web Service** → connect the same GitHub repo.
 4. **Settings**:
@@ -75,8 +75,12 @@ This project uses **.NET 8 + EF Core + Npgsql (PostgreSQL)**. **SQL Server is no
 5. **Environment Variables** (Production):
    - **Name**: `VITE_API_URL`  
    - **Value**: your **Render API base URL only**, with **https**, **no** trailing slash, **no** `/api`  
-   - Example: `https://kiryana_api.onrender.com` (or whatever hostname Render shows for the service)
-6. Deploy. Your **Vercel URL** (e.g. `https://kiryana-store.vercel.app`) is the link you usually submit for the **frontend** (it talks to Render in the background).
+   - Example: `https://kiryana-api.onrender.com`
+6. **Deploy** (and run **Redeploy** in Vercel if you add or change `VITE_API_URL` later; Vite reads env at **build** time, not in the live browser). Your **Vercel URL** (e.g. `https://kiryanastore.vercel.app`) is the link you usually submit for the **frontend**.
+
+**If the dashboard says “make sure the backend is running” and DevTools show `404` to `yoursite.vercel.app/api/...`:** the app is still calling **Vercel** for the API, not Render — usually `VITE_API_URL` was missing in the last build. Set it and redeploy. This repo also includes [frontend/vercel.json](frontend/vercel.json) so relative `/api/*` requests on Vercel can be **rewritten** to your Render service (update the host there if it differs from `kiryana-api`).
+
+**Opening `https://<your-api>.onrender.com/` in the browser shows 404** — that is **normal**; the API has no page at `/`. Check `https://<your-api>.onrender.com/swagger` or `https://<your-api>.onrender.com/api/items` instead (same as local: there is often no “home page” for the API).
 
 **Why this variable**
 
