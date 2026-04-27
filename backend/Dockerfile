@@ -19,4 +19,8 @@ RUN dotnet publish "KiryanaStore.API.csproj" -c Release -o /app/publish /p:UseAp
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "KiryanaStore.API.dll"]
+COPY entrypoint.sh /entrypoint.sh
+# Normalize Windows line endings if the repo was checked out on Windows
+RUN sed -i 's/\r$//' /entrypoint.sh && chmod +x /entrypoint.sh
+EXPOSE 8080 10000
+ENTRYPOINT ["/entrypoint.sh"]

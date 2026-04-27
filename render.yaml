@@ -18,9 +18,8 @@ services:
     rootDir: backend
     dockerfilePath: ./Dockerfile
     healthCheckPath: /api/items
+    # ASPNETCORE_URLS is set in backend/entrypoint.sh from $PORT (Render-injected; often 10000, not 8080).
     envVars:
-      - key: ASPNETCORE_URLS
-        value: http://0.0.0.0:8080
       - key: ASPNETCORE_ENVIRONMENT
         value: Production
       - key: DATABASE_URL
