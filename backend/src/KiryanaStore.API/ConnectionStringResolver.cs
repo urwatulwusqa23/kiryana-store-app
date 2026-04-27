@@ -2,19 +2,25 @@ namespace KiryanaStore.API;
 
 public static class ConnectionStringResolver
 {
-    /// <summary>Resolves Npgsql connection string. Supports Render/Railway-style postgres:// URLs via DATABASE_URL.</summary>
+    /// <summary>Resolves Npgsql connection string. Render/Railway set DATABASE_URL; that must win over appsettings (which may list localhost for dev only).</summary>
     public static string? ResolveConnectionString(IConfiguration config)
     {
+        // 1) PaaS: DATABASE_URL (or env) is authoritative on Render, Fly, Heroku, etc.
+        var databaseUrl = config["DATABASE_URL"] ?? Environment.GetEnvironmentVariable("DATABASE_URL");
+        if (!string.IsNullOrWhiteSpace(databaseUrl))
+        {
+            if (databaseUrl.StartsWith("postgres://", StringComparison.OrdinalIgnoreCase) ||
+                databaseUrl.StartsWith("postgresql://", StringComparison.OrdinalIgnoreCase))
+                return ToNpgsqlConnectionString(databaseUrl);
+            return databaseUrl;
+        }
+
+        // 2) appsettings / ConnectionStrings__DefaultConnection (local, Docker compose, etc.)
         var s = config.GetConnectionString("DefaultConnection");
         if (!string.IsNullOrWhiteSpace(s))
             return s;
-        s = config["DATABASE_URL"] ?? Environment.GetEnvironmentVariable("DATABASE_URL");
-        if (string.IsNullOrWhiteSpace(s))
-            return null;
-        if (s.StartsWith("postgres://", StringComparison.OrdinalIgnoreCase) ||
-            s.StartsWith("postgresql://", StringComparison.OrdinalIgnoreCase))
-            return ToNpgsqlConnectionString(s);
-        return s;
+
+        return null;
     }
 
     private static string ToNpgsqlConnectionString(string databaseUrl)

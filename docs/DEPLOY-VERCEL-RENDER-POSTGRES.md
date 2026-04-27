@@ -122,6 +122,6 @@ Push to GitHub; Render will rebuild. Migrations run automatically on API startup
 |--------|----------------|
 | Vercel shows blank / API errors | `VITE_API_URL` must be the **Render** URL, `https`, no `/api` suffix. Redeploy Vercel after changing env. |
 | Render 502 / timeout on first open | Free tier **cold start**; wait and refresh. |
-| DB connection errors on Render | Same region; use **Internal** `DATABASE_URL` for the web service; check Render DB is **available**. |
+| DB connection errors on Render | Same region; use **Internal** `DATABASE_URL` for the web service; check Render DB is **available**. If logs show **127.0.0.1:5432**, the app was using `appsettings.json` localhost — **DATABASE_URL** must take priority (fixed in `ConnectionStringResolver`); redeploy. |
 | Migrations fail | Logs on Render; ensure `DATABASE_URL` is set and reachable. |
 | **Deploy exit 139** (or crash on boot) | Often wrong listen **port** on PaaS: the API must use Render’s `PORT` env (often `10000`, not `8080`). `Program.cs` sets `ASPNETCORE_URLS` from `PORT` before `CreateBuilder`. If it still fails, open the **full deploy log** (not only the events list) and check for OOM, DB SSL, or migration errors. |
