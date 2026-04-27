@@ -1,21 +1,21 @@
 services:
-  sqlserver:
-    image: mcr.microsoft.com/mssql/server:2022-latest
-    container_name: kiryana_sqlserver
+  postgres:
+    image: postgres:16-alpine
+    container_name: kiryana_postgres
     environment:
-      ACCEPT_EULA: "Y"
-      SA_PASSWORD: "${MSSQL_SA_PASSWORD}"
-      MSSQL_PID: "Developer"
+      POSTGRES_USER: kiryana
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD:-devlocal123}"
+      POSTGRES_DB: kiryanadb
     ports:
-      - "1433:1433"
+      - "5432:5432"
     volumes:
-      - sqlserver_data:/var/opt/mssql
+      - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P \"$$SA_PASSWORD\" -Q \"SELECT 1\" -C"]
-      interval: 15s
-      timeout: 10s
-      retries: 10
-      start_period: 30s
+      test: ["CMD-SHELL", "pg_isready -U kiryana -d kiryanadb"]
+      interval: 5s
+      timeout: 5s
+      retries: 8
+      start_period: 10s
 
   backend:
     build:
@@ -23,12 +23,12 @@ services:
       dockerfile: Dockerfile
     container_name: kiryana_backend
     environment:
-      ConnectionStrings__DefaultConnection: "Server=sqlserver,1433;Database=KiryanaStoreDb;User Id=sa;Password=${MSSQL_SA_PASSWORD};TrustServerCertificate=True;"
+      ConnectionStrings__DefaultConnection: "Host=postgres;Port=5432;Database=kiryanadb;Username=kiryana;Password=${POSTGRES_PASSWORD:-devlocal123}"
       ASPNETCORE_URLS: "http://+:8080"
     ports:
       - "18080:8080"
     depends_on:
-      sqlserver:
+      postgres:
         condition: service_healthy
     restart: on-failure
 
@@ -43,4 +43,4 @@ services:
       - backend
 
 volumes:
-  sqlserver_data:
+  pgdata:

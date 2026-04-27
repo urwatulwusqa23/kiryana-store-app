@@ -1,6 +1,9 @@
 # Smart Kiryana Assistant — Setup Guide
 
-For a **24/7 public URL** (not running on your PC), read [docs/DEPLOY-24-7-ALWAYS-ON.md](docs/DEPLOY-24-7-ALWAYS-ON.md).
+For a **24/7 public URL** (not on your PC), use:
+
+- **Vercel (frontend) + Render (backend) + managed Postgres** — [docs/DEPLOY-VERCEL-RENDER-POSTGRES.md](docs/DEPLOY-VERCEL-RENDER-POSTGRES.md) (this matches the current stack: PostgreSQL + Vite + .NET).
+- **Azure (single “cloud” container + DB)** — [docs/DEPLOY-24-7-ALWAYS-ON.md](docs/DEPLOY-24-7-ALWAYS-ON.md) (note: the sample Bicep there targets Azure SQL; the app in this repo now uses **Postgres** — use Render/Neon or run Postgres on a VM, or change the Bicep to Azure Database for PostgreSQL).
 
 ## Project Structure
 
@@ -31,16 +34,16 @@ kiryana store/
 ```bash
 cd "kiryana store"
 cp .env.example .env
-# Edit .env if you want a different SQL Server password
+# Set POSTGRES_PASSWORD in .env (or rely on the default in compose for local dev)
 docker compose up --build
 ```
 
-| Service    | URL                         |
+| Service     | URL                         |
 |------------|-----------------------------|
 | Frontend   | http://localhost:13000      |
 | Backend API| http://localhost:18080      |
 | Swagger    | http://localhost:18080/swagger |
-| SQL Server | localhost:1433              |
+| PostgreSQL | localhost:5432              |
 
 Demo data is auto-seeded on first run.
 
@@ -51,14 +54,10 @@ Demo data is auto-seeded on first run.
 ### Backend — Visual Studio
 
 1. Open `backend/KiryanaStore.sln` in Visual Studio 2022
-2. Make sure you have SQL Server running (LocalDB, Express, or Docker):
-   ```bash
-   # Quick SQL Server via Docker:
-   docker run -e "ACCEPT_EULA=Y" -e "SA_PASSWORD=ChangeThisStrongPassword123!" -p 1433:1433 -d mcr.microsoft.com/mssql/server:2022-latest
-   ```
-3. Check `appsettings.json` connection string (default targets `localhost,1433`)
-4. Press **F5** to run — EF migrations + seeding happen automatically on startup
-5. Swagger opens at https://localhost:7xxx/swagger
+2. Start **PostgreSQL** (easiest: use the repo’s Docker Compose and only run the `postgres` service, or install Postgres locally and match `appsettings.Development.json`).
+3. Check `appsettings.Development.json` / `appsettings.json` for `ConnectionStrings:DefaultConnection` (defaults to `localhost:5432`, user `kiryana`, database `kiryanadb`).
+4. Press **F5** to run — EF migrations + seeding run on startup
+5. Swagger: `https://localhost:<port>/swagger`
 
 ### Frontend — VS Code / Terminal
 
@@ -106,7 +105,7 @@ dotnet ef database update --project src/KiryanaStore.Infrastructure --startup-pr
 | Frontend    | React 18, Vite, Tailwind CSS  |
 | Backend     | ASP.NET Core 8, Clean Arch    |
 | ORM         | Entity Framework Core 8       |
-| Database    | SQL Server 2022               |
+| Database    | PostgreSQL 16 (Npgsql)        |
 | Container   | Docker + Docker Compose       |
 | API Docs    | Swagger / OpenAPI             |
 

@@ -1,3 +1,4 @@
+using KiryanaStore.API;
 using KiryanaStore.Application.Interfaces;
 using KiryanaStore.Application.Services;
 using KiryanaStore.Domain.Entities;
@@ -12,11 +13,11 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
-    ?? "Data Source=(localdb)\\MSSQLLocalDB;Initial Catalog=KiryanaStoreDb;Integrated Security=True;";
+var connectionString = ConnectionStringResolver.ResolveConnectionString(builder.Configuration)
+    ?? "Host=localhost;Port=5432;Database=kiryanadb;Username=kiryana;Password=devlocal123";
 
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer(connectionString));
+    options.UseNpgsql(connectionString));
 
 // Repositories
 builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();

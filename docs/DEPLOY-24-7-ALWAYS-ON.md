@@ -57,7 +57,7 @@ If you cannot use Azure, run the **same** `docker compose` stack on a small **al
 
 1. Create a free-tier VM (e.g. Oracle Cloud Always Free AMD or ARM).
 2. Install Docker.
-3. Clone this repo, copy `.env.example` to `.env`, set `MSSQL_SA_PASSWORD`, open ports for the frontend (e.g. 13000) in the cloud firewall.
+3. Clone this repo, copy `.env.example` to `.env`, set `POSTGRES_PASSWORD`, open ports for the frontend (e.g. 13000) in the cloud firewall. Run Postgres in Docker on the VM or install PostgreSQL.
 4. `docker compose up -d --build`
 5. Use the VM **public IP** (or a domain) as the submission link. For HTTPS, add Caddy or nginx with Let’s Encrypt (optional).
 
