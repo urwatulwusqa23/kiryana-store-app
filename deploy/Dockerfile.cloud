@@ -1,0 +1,29 @@
+# Single container: ASP.NET API + React static files in wwwroot (for Azure / PaaS 24/7)
+# Build from repo root: docker build -f deploy/Dockerfile.cloud -t kiryana-cloud .
+
+FROM node:20-alpine AS fe
+WORKDIR /fe
+COPY frontend/package.json frontend/package-lock.json ./
+RUN npm ci
+COPY frontend/ ./
+ENV VITE_API_URL=
+RUN npm run build
+
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS be
+WORKDIR /src
+COPY ["backend/src/KiryanaStore.API/KiryanaStore.API.csproj", "src/KiryanaStore.API/"]
+COPY ["backend/src/KiryanaStore.Application/KiryanaStore.Application.csproj", "src/KiryanaStore.Application/"]
+COPY ["backend/src/KiryanaStore.Domain/KiryanaStore.Domain.csproj", "src/KiryanaStore.Domain/"]
+COPY ["backend/src/KiryanaStore.Infrastructure/KiryanaStore.Infrastructure.csproj", "src/KiryanaStore.Infrastructure/"]
+RUN dotnet restore "src/KiryanaStore.API/KiryanaStore.API.csproj"
+COPY backend/ .
+COPY --from=fe /fe/dist ./src/KiryanaStore.API/wwwroot
+WORKDIR "/src/src/KiryanaStore.API"
+RUN dotnet publish "KiryanaStore.API.csproj" -c Release -o /app/publish /p:UseAppHost=false
+
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
+WORKDIR /app
+EXPOSE 8080
+ENV ASPNETCORE_URLS=http://+:8080
+COPY --from=be /app/publish .
+ENTRYPOINT ["dotnet", "KiryanaStore.API.dll"]

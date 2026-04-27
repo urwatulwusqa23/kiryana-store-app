@@ -1,5 +1,7 @@
 # Smart Kiryana Assistant — Setup Guide
 
+For a **24/7 public URL** (not running on your PC), read [docs/DEPLOY-24-7-ALWAYS-ON.md](docs/DEPLOY-24-7-ALWAYS-ON.md).
+
 ## Project Structure
 
 ```

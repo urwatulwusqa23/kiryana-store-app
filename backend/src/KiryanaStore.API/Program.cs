@@ -45,8 +45,20 @@ app.UseSwagger();
 app.UseSwaggerUI();
 
 app.UseCors("AllowAll");
+
+var wwwroot = Path.Combine(app.Environment.ContentRootPath, "wwwroot");
+var hasSpa = File.Exists(Path.Combine(wwwroot, "index.html"));
+if (hasSpa)
+{
+    app.UseDefaultFiles();
+    app.UseStaticFiles();
+}
+
 app.UseAuthorization();
 app.MapControllers();
+
+if (hasSpa)
+    app.MapFallbackToFile("index.html");
 
 using (var scope = app.Services.CreateScope())
 {
