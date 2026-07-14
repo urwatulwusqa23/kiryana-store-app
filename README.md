@@ -87,10 +87,19 @@ dotnet ef migrations add InitialCreate --project src/KiryanaStore.Infrastructure
 dotnet ef database update --project src/KiryanaStore.Infrastructure --startup-project src/KiryanaStore.API
 ```
 
+## Authentication
+
+All `/api/*` endpoints except `/api/auth/login` and `/api/health` require a JWT bearer token.
+
+- **Local dev**: default credentials are `admin` / `admin123` (set in `appsettings.Development.json`). The frontend owner portal shows a login screen that calls `POST /api/auth/login` and stores the token.
+- **Production**: `Jwt:Secret`, `AdminUser:Username`, `AdminUser:PasswordHash` (SHA-256 hex of the password) and `Cors:AllowedOrigins` must be set via environment variables (`Jwt__Secret`, `AdminUser__Username`, etc.) — see `render.yaml`. The API refuses to serve requests without these configured.
+
 ## API Endpoints
 
 | Method | Endpoint                     | Description               |
 |--------|-------------------------------|----------------------------|
+| POST   | /api/auth/login                | Log in, returns JWT        |
+| GET    | /api/health                    | Public health check        |
 | GET    | /api/sales/dashboard          | Dashboard stats            |
 | GET    | /api/customers                 | All customers + balances   |
 | POST   | /api/customers                 | Add customer                |

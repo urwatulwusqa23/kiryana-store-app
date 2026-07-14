@@ -1,11 +1,16 @@
+using System.Text;
 using KiryanaStore.API;
+using KiryanaStore.API.Auth;
 using KiryanaStore.Application.Interfaces;
 using KiryanaStore.Application.Services;
 using KiryanaStore.Domain.Entities;
 using KiryanaStore.Domain.Interfaces;
 using KiryanaStore.Infrastructure.Data;
 using KiryanaStore.Infrastructure.Repositories;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 
 // Render, Railway, etc. set PORT. Kestrel must bind to that port (often 10000, not 8080).
 // Set before CreateBuilder so the host configuration picks it up.
@@ -44,10 +49,36 @@ builder.Services.AddScoped<ISupplierService, SupplierService>();
 builder.Services.AddScoped<IPurchaseService, PurchaseService>();
 builder.Services.AddScoped<ISaleService, SaleService>();
 
+builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection("Jwt"));
+builder.Services.Configure<AdminUserOptions>(builder.Configuration.GetSection("AdminUser"));
+
+var jwtSecret = builder.Configuration["Jwt:Secret"] ?? "";
+var jwtIssuer = builder.Configuration["Jwt:Issuer"] ?? "KiryanaStore";
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidIssuer = jwtIssuer,
+            ValidateAudience = true,
+            ValidAudience = jwtIssuer,
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecret)),
+            ValidateLifetime = true,
+            ClockSkew = TimeSpan.FromMinutes(1)
+        };
+    });
+builder.Services.AddAuthorization();
+
+var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>()
+    ?? ["http://localhost:5173", "http://localhost:3000"];
+
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowAll", policy =>
-        policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
+    options.AddPolicy("Default", policy =>
+        policy.WithOrigins(allowedOrigins).AllowAnyMethod().AllowAnyHeader());
 });
 
 var app = builder.Build();
@@ -55,7 +86,25 @@ var app = builder.Build();
 app.UseSwagger();
 app.UseSwaggerUI();
 
-app.UseCors("AllowAll");
+app.UseExceptionHandler(handler =>
+{
+    handler.Run(async context =>
+    {
+        var feature = context.Features.Get<IExceptionHandlerFeature>();
+        var ex = feature?.Error;
+        var (status, message) = ex switch
+        {
+            InvalidOperationException => (StatusCodes.Status400BadRequest, ex.Message),
+            KeyNotFoundException => (StatusCodes.Status404NotFound, ex.Message),
+            _ => (StatusCodes.Status500InternalServerError, "An unexpected error occurred.")
+        };
+        context.Response.StatusCode = status;
+        context.Response.ContentType = "application/json";
+        await context.Response.WriteAsJsonAsync(new { error = message });
+    });
+});
+
+app.UseCors("Default");
 
 var wwwroot = Path.Combine(app.Environment.ContentRootPath, "wwwroot");
 var hasSpa = File.Exists(Path.Combine(wwwroot, "index.html"));
@@ -65,6 +114,7 @@ if (hasSpa)
     app.UseStaticFiles();
 }
 
+app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 

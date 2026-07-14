@@ -15,4 +15,10 @@ public class CustomerRepository(AppDbContext db) : GenericRepository<Customer>(d
         var transactions = await _db.CreditTransactions.Where(t => t.CustomerId == customerId).ToListAsync();
         return transactions.Sum(t => t.Type == TransactionType.Credit ? t.Amount : -t.Amount);
     }
+
+    public async Task<decimal> GetTotalBalanceAsync()
+    {
+        var transactions = await _db.CreditTransactions.ToListAsync();
+        return transactions.Sum(t => t.Type == TransactionType.Credit ? t.Amount : -t.Amount);
+    }
 }

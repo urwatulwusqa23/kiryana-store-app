@@ -17,7 +17,7 @@ services:
     region: oregon
     rootDir: backend
     dockerfilePath: ./Dockerfile
-    healthCheckPath: /api/items
+    healthCheckPath: /api/health
     # Kestrel listen port: Program.cs sets ASPNETCORE_URLS from Render's PORT before the host starts.
     envVars:
       - key: ASPNETCORE_ENVIRONMENT
@@ -26,3 +26,14 @@ services:
         fromDatabase:
           name: kiryana-db
           property: connectionString
+      # Required for the API to start accepting logins/requests — see docs for how to generate these.
+      - key: Jwt__Secret
+        sync: false
+      - key: Jwt__Issuer
+        value: KiryanaStore
+      - key: AdminUser__Username
+        sync: false
+      - key: AdminUser__PasswordHash
+        sync: false
+      - key: Cors__AllowedOrigins__0
+        sync: false

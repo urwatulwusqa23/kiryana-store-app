@@ -1,19 +1,40 @@
 import axios from 'axios'
 
 const API_BASE = import.meta.env.VITE_API_URL || ''
+const TOKEN_KEY = 'k_auth_token'
+
+export const auth = {
+  getToken: () => localStorage.getItem(TOKEN_KEY),
+  setToken: token => localStorage.setItem(TOKEN_KEY, token),
+  clearToken: () => localStorage.removeItem(TOKEN_KEY),
+}
 
 const api = axios.create({
   baseURL: `${API_BASE}/api`,
   headers: { 'Content-Type': 'application/json' }
 })
 
+api.interceptors.request.use(config => {
+  const token = auth.getToken()
+  if (token) config.headers.Authorization = `Bearer ${token}`
+  return config
+})
+
 api.interceptors.response.use(
   res => res,
   err => {
+    if (err.response?.status === 401) {
+      auth.clearToken()
+      window.dispatchEvent(new Event('k_auth_expired'))
+    }
     const msg = err.response?.data?.error || err.response?.data?.title || err.message || 'Something went wrong'
     return Promise.reject(new Error(msg))
   }
 )
+
+export const authApi = {
+  login: (username, password) => api.post('/auth/login', { username, password }).then(r => r.data)
+}
 
 export const customerApi = {
   getAll: () => api.get('/customers').then(r => r.data),

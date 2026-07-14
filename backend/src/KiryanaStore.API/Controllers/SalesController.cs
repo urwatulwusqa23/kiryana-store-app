@@ -1,11 +1,13 @@
 using KiryanaStore.Application.DTOs;
 using KiryanaStore.Application.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace KiryanaStore.API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize]
 public class SalesController(ISaleService service) : ControllerBase
 {
     [HttpGet]

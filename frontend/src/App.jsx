@@ -16,7 +16,9 @@ import Orders            from './pages/Orders'
 import KharchaKhata      from './pages/KharchaKhata'
 import CustomerPortal from './portals/CustomerPortal'
 import RiderPortal    from './portals/RiderPortal'
+import Login          from './pages/Login'
 import { getPendingCount } from './store/orderStore'
+import { auth } from './services/api'
 
 /* ─── Portal definitions ─────────────────────────────────────── */
 const PORTALS = [
@@ -318,9 +320,16 @@ const TOAST_OPTS = {
 
 export default function App() {
   const [portal, setPortal] = useState(() => localStorage.getItem('k_portal') || null)
+  const [authed, setAuthed] = useState(() => !!auth.getToken())
 
   const selectPortal = p => { localStorage.setItem('k_portal', p); setPortal(p) }
-  const switchPortal = () => { localStorage.removeItem('k_portal'); setPortal(null) }
+  const switchPortal = () => { localStorage.removeItem('k_portal'); auth.clearToken(); setAuthed(false); setPortal(null) }
+
+  useEffect(() => {
+    const onExpired = () => setAuthed(false)
+    window.addEventListener('k_auth_expired', onExpired)
+    return () => window.removeEventListener('k_auth_expired', onExpired)
+  }, [])
 
   if (!portal) return (
     <>
@@ -340,6 +349,13 @@ export default function App() {
     <>
       <Toaster position="top-right" toastOptions={TOAST_OPTS} />
       <RiderPortal onSwitch={switchPortal} />
+    </>
+  )
+
+  if (!authed) return (
+    <>
+      <Toaster position="top-right" toastOptions={TOAST_OPTS} />
+      <Login onSuccess={() => setAuthed(true)} />
     </>
   )
 

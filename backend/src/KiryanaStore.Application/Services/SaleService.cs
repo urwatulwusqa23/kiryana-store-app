@@ -9,14 +9,8 @@ public class SaleService(ISaleRepository saleRepo, IItemRepository itemRepo, ICu
 {
     public async Task<IEnumerable<SaleDto>> GetAllAsync()
     {
-        var sales = await saleRepo.GetAllAsync();
-        var result = new List<SaleDto>();
-        foreach (var s in sales)
-        {
-            var full = await saleRepo.GetWithItemsAsync(s.Id);
-            if (full is not null) result.Add(MapToDto(full));
-        }
-        return result;
+        var sales = await saleRepo.GetAllWithItemsAsync();
+        return sales.Select(MapToDto);
     }
 
     public async Task<SaleDto?> GetByIdAsync(int id)
@@ -71,19 +65,11 @@ public class SaleService(ISaleRepository saleRepo, IItemRepository itemRepo, ICu
 
         var todaySales = await saleRepo.GetSalesByDateRangeAsync(todayStart, now);
         var monthSales = await saleRepo.GetSalesByDateRangeAsync(monthStart, now);
-        var allSales = await saleRepo.GetAllAsync();
-        var recentSales = allSales.OrderByDescending(s => s.SaleDate).Take(5).ToList();
-        var recentFull = new List<SaleDto>();
-        foreach (var s in recentSales)
-        {
-            var full = await saleRepo.GetWithItemsAsync(s.Id);
-            if (full is not null) recentFull.Add(MapToDto(full));
-        }
+        var recentSales = await saleRepo.GetRecentWithItemsAsync(5);
+        var recentFull = recentSales.Select(MapToDto).ToList();
 
-        var customers = await customerRepo.GetAllAsync();
-        decimal totalUdhaar = 0;
-        foreach (var c in customers)
-            totalUdhaar += await customerRepo.GetBalanceAsync(c.Id);
+        var customerCount = (await customerRepo.GetAllAsync()).Count();
+        var totalUdhaar = await customerRepo.GetTotalBalanceAsync();
 
         var lowStockItems = await itemRepo.GetLowStockItemsAsync();
         var allItems = await itemRepo.GetAllAsync();
@@ -93,7 +79,7 @@ public class SaleService(ISaleRepository saleRepo, IItemRepository itemRepo, ICu
             todaySales.Sum(s => s.TotalRevenue - s.TotalCost),
             monthSales.Sum(s => s.TotalRevenue), monthSales.Sum(s => s.TotalCost),
             monthSales.Sum(s => s.TotalRevenue - s.TotalCost),
-            customers.Count(), totalUdhaar,
+            customerCount, totalUdhaar,
             lowStockItems.Count(), allItems.Count(),
             lowStockItems.Select(i => new ItemDto(i.Id, i.Name, i.Unit, i.CostPrice, i.SellingPrice,
                 i.Quantity, i.LowStockThreshold, true, i.CreatedAt)),

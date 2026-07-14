@@ -6,4 +6,5 @@ public interface ICustomerRepository : IRepository<Customer>
 {
     Task<Customer?> GetWithTransactionsAsync(int id);
     Task<decimal> GetBalanceAsync(int customerId);
+    Task<decimal> GetTotalBalanceAsync();
 }

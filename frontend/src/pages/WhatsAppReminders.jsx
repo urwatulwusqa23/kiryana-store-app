@@ -38,9 +38,15 @@ function autoTone(days) {
   return 'firm'
 }
 
+const DEFAULT_COUNTRY_CODE = '92' // Pakistan — this store's locale (see Urdu templates, PKR, Lahore address)
+
 function waLink(phone, text) {
-  const n = (phone || '').replace(/\D/g, '').replace(/^0/, '')
-  return `https://wa.me/92${n}?text=${encodeURIComponent(text)}`
+  const digits = (phone || '').replace(/\D/g, '')
+  // Already has a country code (11+ digits with no leading 0) — use as-is; otherwise prefix the default.
+  const n = digits.startsWith('0')
+    ? DEFAULT_COUNTRY_CODE + digits.slice(1)
+    : digits.length > 10 ? digits : DEFAULT_COUNTRY_CODE + digits
+  return `https://wa.me/${n}?text=${encodeURIComponent(text)}`
 }
 
 /* ─── Reminder storage ───────────────────────────────────────── */
