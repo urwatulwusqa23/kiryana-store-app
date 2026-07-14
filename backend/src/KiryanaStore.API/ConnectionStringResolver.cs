@@ -2,10 +2,23 @@ namespace KiryanaStore.API;
 
 public static class ConnectionStringResolver
 {
-    /// <summary>Resolves Npgsql connection string. Render/Railway set DATABASE_URL; that must win over appsettings (which may list localhost for dev only).</summary>
+    /// <summary>
+    /// Resolves Npgsql connection string.
+    /// Production: <c>DATABASE_URL</c> from Render/Railway wins when set.
+    /// Development: <c>ConnectionStrings:DefaultConnection</c> wins so a machine-level <c>DATABASE_URL</c> does not override local Postgres.
+    /// </summary>
     public static string? ResolveConnectionString(IConfiguration config)
     {
-        // 1) PaaS: DATABASE_URL (or env) is authoritative on Render, Fly, Heroku, etc.
+        var env = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")
+            ?? config["ASPNETCORE_ENVIRONMENT"];
+
+        var defaultConnection = config.GetConnectionString("DefaultConnection");
+        var isDevelopment = string.Equals(env, "Development", StringComparison.OrdinalIgnoreCase);
+
+        if (isDevelopment && !string.IsNullOrWhiteSpace(defaultConnection))
+            return defaultConnection;
+
+        // PaaS: DATABASE_URL (or env) is authoritative on Render, Fly, Heroku, etc.
         var databaseUrl = config["DATABASE_URL"] ?? Environment.GetEnvironmentVariable("DATABASE_URL");
         if (!string.IsNullOrWhiteSpace(databaseUrl))
         {
@@ -15,10 +28,8 @@ public static class ConnectionStringResolver
             return databaseUrl;
         }
 
-        // 2) appsettings / ConnectionStrings__DefaultConnection (local, Docker compose, etc.)
-        var s = config.GetConnectionString("DefaultConnection");
-        if (!string.IsNullOrWhiteSpace(s))
-            return s;
+        if (!string.IsNullOrWhiteSpace(defaultConnection))
+            return defaultConnection;
 
         return null;
     }
