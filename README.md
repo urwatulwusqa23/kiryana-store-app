@@ -8,6 +8,7 @@ A full-stack point-of-sale and business management app for small Indian *kiryana
 - **Frontend**: React 18 + Vite, Tailwind CSS, React Router, Axios
 - **Database**: PostgreSQL
 - **Deployment**: Docker Compose (local), Vercel (frontend) + Render (backend + Postgres) for a 24/7 public URL
+https://kiryanastore-git-main-urwatulwusqa23s-projects.vercel.app/
 
 ## Features
 
