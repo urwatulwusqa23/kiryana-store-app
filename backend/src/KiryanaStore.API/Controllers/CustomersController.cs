@@ -7,7 +7,7 @@ namespace KiryanaStore.API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-[Authorize]
+[Authorize(Roles = "Owner,Employee")]
 public class CustomersController(ICustomerService service) : ControllerBase
 {
     [HttpGet]

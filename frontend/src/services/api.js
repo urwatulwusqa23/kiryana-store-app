@@ -3,10 +3,16 @@ import axios from 'axios'
 const API_BASE = import.meta.env.VITE_API_URL || ''
 const TOKEN_KEY = 'k_auth_token'
 
+const PROFILE_KEY = 'k_auth_profile'
+
 export const auth = {
   getToken: () => localStorage.getItem(TOKEN_KEY),
   setToken: token => localStorage.setItem(TOKEN_KEY, token),
-  clearToken: () => localStorage.removeItem(TOKEN_KEY),
+  clearToken: () => { localStorage.removeItem(TOKEN_KEY); localStorage.removeItem(PROFILE_KEY) },
+  setProfile: ({ role, storeName, fullName }) =>
+    localStorage.setItem(PROFILE_KEY, JSON.stringify({ role, storeName, fullName })),
+  getProfile: () => { try { return JSON.parse(localStorage.getItem(PROFILE_KEY) || 'null') } catch { return null } },
+  getRole: () => auth.getProfile()?.role || null,
 }
 
 const api = axios.create({
@@ -33,7 +39,15 @@ api.interceptors.response.use(
 )
 
 export const authApi = {
-  login: (username, password) => api.post('/auth/login', { username, password }).then(r => r.data)
+  login: (username, password) => api.post('/auth/login', { username, password }).then(r => r.data),
+  registerStore: data => api.post('/auth/register-store', data).then(r => r.data),
+}
+
+export const usersApi = {
+  getAll: role => api.get('/users', { params: role ? { role } : {} }).then(r => r.data),
+  create: data => api.post('/users', data).then(r => r.data),
+  update: (id, data) => api.put(`/users/${id}`, data).then(r => r.data),
+  delete: id => api.delete(`/users/${id}`),
 }
 
 export const customerApi = {

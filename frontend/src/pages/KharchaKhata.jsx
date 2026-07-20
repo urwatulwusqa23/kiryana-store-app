@@ -30,7 +30,7 @@ export const CATS = [
   { id: 'kiraya',    label: 'Kiraya',     urdu: 'کرایہ',      icon: '🏠', color: '#3b82f6', deductible: true  },
   { id: 'tankhwa',   label: 'Tankhwa',   urdu: 'تنخواہ',     icon: '👷', color: '#10b981', deductible: true  },
   { id: 'thailay',   label: 'Thailay',   urdu: 'تھیلے',      icon: '🛍',  color: '#f97316', deductible: false },
-  { id: 'chai',      label: 'Chai Pani', urdu: 'چائے پانی',  icon: '☕', color: '#a855f7', deductible: false },
+  { id: 'chai',      label: 'Chai Pani', urdu: 'چائے پانی',  icon: '☕', color: 'var(--purple)', deductible: false },
   { id: 'phone',     label: 'Phone',     urdu: 'فون',         icon: '📱', color: '#06b6d4', deductible: true  },
   { id: 'marmmat',   label: 'Marmmat',   urdu: 'مرمت',       icon: '🔧', color: '#f59e0b', deductible: true  },
   { id: 'transport', label: 'Transport', urdu: 'ٹرانسپورٹ',  icon: '🚗', color: '#84cc16', deductible: false },
@@ -731,7 +731,7 @@ function LogTab({ expenses, onEdit, onDelete }) {
                     <Edit2 size={12} style={{ color: '#64748b' }} />
                   </button>
                   <button onClick={() => onDelete(e.id)}
-                    style={{ padding: 5, borderRadius: 5, background: 'rgba(255,71,87,0.06)', cursor: 'pointer', border: 'none' }}>
+                    style={{ padding: 5, borderRadius: 5, background: 'rgba(179,69,46,0.06)', cursor: 'pointer', border: 'none' }}>
                     <Trash2 size={12} style={{ color: '#dc2626' }} />
                   </button>
                 </div>

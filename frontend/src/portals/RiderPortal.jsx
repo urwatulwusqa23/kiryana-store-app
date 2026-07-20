@@ -4,14 +4,14 @@ import { saleApi } from '../services/api'
 import { getAllOrders, advanceOrder, STEPS } from '../store/orderStore'
 import toast from 'react-hot-toast'
 
-const YELLOW = '#ffd60a'
+const YELLOW = 'var(--gold)'
 const RIDER  = { name: 'Asif Khan', area: 'Gulberg III, Lahore' }
 
 const STATUS_META = {
-  confirmed:  { color: '#5b8af5', bg: 'rgba(91,138,245,0.12)', label: 'Confirmed'   },
-  picked_up:  { color: '#ff6b35', bg: 'rgba(255,107,53,0.12)', label: 'Picked Up'   },
-  on_the_way: { color: '#ffd60a', bg: 'rgba(255,214,10,0.12)', label: 'On the Way'  },
-  delivered:  { color: '#00d4aa', bg: 'rgba(0,212,170,0.12)',  label: '✓ Delivered' },
+  confirmed:  { color: 'var(--blue)', bg: 'rgba(92,122,138,0.12)', label: 'Confirmed'   },
+  picked_up:  { color: 'var(--accent)', bg: 'rgba(179,69,46,0.12)', label: 'Picked Up'   },
+  on_the_way: { color: 'var(--gold)', bg: 'rgba(201,154,63,0.12)', label: 'On the Way'  },
+  delivered:  { color: 'var(--accent)', bg: 'rgba(179,69,46,0.12)',  label: '✓ Delivered' },
 }
 
 const NEXT_BTN = {
@@ -160,7 +160,7 @@ function ActiveDeliveries({ deliveries, onAdvance }) {
       <div className="grid grid-cols-3 gap-2">
         {[
           { label: 'Total',       val: deliveries.length,                                       color: 'var(--text)'   },
-          { label: 'Confirmed',   val: deliveries.filter(d => d.orderState.status === 'confirmed').length,  color: '#5b8af5' },
+          { label: 'Confirmed',   val: deliveries.filter(d => d.orderState.status === 'confirmed').length,  color: 'var(--blue)' },
           { label: 'In Transit',  val: deliveries.filter(d => ['picked_up','on_the_way'].includes(d.orderState.status)).length, color: YELLOW },
         ].map(s => (
           <div key={s.label} className="rounded-xl p-3 text-center"
@@ -295,7 +295,7 @@ function DeliveredOrders({ orders }) {
         </p>
         <div className="grid grid-cols-2 gap-3">
           <div className="rounded-xl p-3 text-center"
-            style={{ background: 'rgba(0,212,170,0.08)' }}>
+            style={{ background: 'rgba(179,69,46,0.08)' }}>
             <p className="text-xl font-extrabold" style={{ color: 'var(--accent)' }}>
               {orders.length}
             </p>

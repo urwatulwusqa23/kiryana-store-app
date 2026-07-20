@@ -5,7 +5,7 @@ using KiryanaStore.Domain.Interfaces;
 
 namespace KiryanaStore.Application.Services;
 
-public class PurchaseService(IPurchaseRepository purchaseRepo, IItemRepository itemRepo) : IPurchaseService
+public class PurchaseService(IPurchaseRepository purchaseRepo, IItemRepository itemRepo, ICurrentUserContext currentUser) : IPurchaseService
 {
     public async Task<IEnumerable<PurchaseDto>> GetAllAsync()
     {
@@ -29,6 +29,7 @@ public class PurchaseService(IPurchaseRepository purchaseRepo, IItemRepository i
     {
         var purchase = new Purchase
         {
+            StoreId = currentUser.StoreId,
             SupplierId = dto.SupplierId,
             Notes = dto.Notes,
             TotalCost = dto.Items.Sum(i => i.Quantity * i.UnitCost),

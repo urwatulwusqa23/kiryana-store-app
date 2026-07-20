@@ -3,6 +3,7 @@ namespace KiryanaStore.Domain.Entities;
 public class Sale
 {
     public int Id { get; set; }
+    public int StoreId { get; set; }
     public DateTime SaleDate { get; set; } = DateTime.UtcNow;
     public decimal TotalRevenue { get; set; }
     public decimal TotalCost { get; set; }

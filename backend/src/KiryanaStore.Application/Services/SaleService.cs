@@ -5,7 +5,7 @@ using KiryanaStore.Domain.Interfaces;
 
 namespace KiryanaStore.Application.Services;
 
-public class SaleService(ISaleRepository saleRepo, IItemRepository itemRepo, ICustomerRepository customerRepo) : ISaleService
+public class SaleService(ISaleRepository saleRepo, IItemRepository itemRepo, ICustomerRepository customerRepo, ICurrentUserContext currentUser) : ISaleService
 {
     public async Task<IEnumerable<SaleDto>> GetAllAsync()
     {
@@ -42,6 +42,7 @@ public class SaleService(ISaleRepository saleRepo, IItemRepository itemRepo, ICu
 
         var sale = new Sale
         {
+            StoreId = currentUser.StoreId,
             CustomerName = dto.CustomerName,
             TotalRevenue = totalRevenue,
             TotalCost = totalCost,

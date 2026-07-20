@@ -5,7 +5,7 @@ using KiryanaStore.Domain.Interfaces;
 
 namespace KiryanaStore.Application.Services;
 
-public class CustomerService(ICustomerRepository customerRepo, IRepository<CreditTransaction> txRepo) : ICustomerService
+public class CustomerService(ICustomerRepository customerRepo, IRepository<CreditTransaction> txRepo, ICurrentUserContext currentUser) : ICustomerService
 {
     public async Task<IEnumerable<CustomerDto>> GetAllAsync()
     {
@@ -32,6 +32,7 @@ public class CustomerService(ICustomerRepository customerRepo, IRepository<Credi
     {
         var entity = new Customer
         {
+            StoreId = currentUser.StoreId,
             Name = dto.Name,
             Phone = dto.Phone,
             Address = dto.Address,
@@ -79,6 +80,7 @@ public class CustomerService(ICustomerRepository customerRepo, IRepository<Credi
         var type = Enum.Parse<TransactionType>(dto.Type, true);
         var tx = new CreditTransaction
         {
+            StoreId = currentUser.StoreId,
             CustomerId = dto.CustomerId,
             Amount = dto.Amount,
             Type = type,

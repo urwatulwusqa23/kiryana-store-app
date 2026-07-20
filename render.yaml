@@ -31,9 +31,5 @@ services:
         sync: false
       - key: Jwt__Issuer
         value: KiryanaStore
-      - key: AdminUser__Username
-        sync: false
-      - key: AdminUser__PasswordHash
-        sync: false
       - key: Cors__AllowedOrigins__0
         sync: false

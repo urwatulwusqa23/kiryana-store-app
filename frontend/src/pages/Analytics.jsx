@@ -203,7 +203,7 @@ function DailyClosingSummary({ sales, customers }) {
           </div>
           <div className="flex items-center gap-2">
             <span className="text-[10px] font-semibold px-2 py-0.5 rounded"
-              style={{ background: 'rgba(255,214,10,0.1)', color: 'var(--yellow)', border: '1px solid rgba(255,214,10,0.2)' }}>
+              style={{ background: 'rgba(201,154,63,0.1)', color: 'var(--yellow)', border: '1px solid rgba(201,154,63,0.2)' }}>
               {today.toLocaleDateString('en-PK', { day: 'numeric', month: 'short' })}
             </span>
             <button onClick={shareWhatsApp}
@@ -219,7 +219,7 @@ function DailyClosingSummary({ sales, customers }) {
           {[
             { label: 'Revenue',  today: todayStats.revenue, yesterday: yesterdayStats.revenue, color: 'var(--accent)' },
             { label: 'Profit',   today: todayStats.profit,  yesterday: yesterdayStats.profit,  color: 'var(--blue)' },
-            { label: 'Orders',   today: todayStats.count,   yesterday: yesterdayStats.count,   color: '#a855f7', isCount: true },
+            { label: 'Orders',   today: todayStats.count,   yesterday: yesterdayStats.count,   color: 'var(--purple)', isCount: true },
           ].map(({ label, today: tv, yesterday: yv, color, isCount }) => {
             const delta = tv - yv
             const up = delta > 0
@@ -297,7 +297,7 @@ function DailyClosingSummary({ sales, customers }) {
 
         {todayStats.revenue > 0 && totalUdhaar / todayStats.revenue > 0.15 && (
           <div className="mt-4 flex items-start gap-2 px-3 py-2.5 rounded-lg"
-            style={{ background: 'rgba(255,71,87,0.07)', border: '1px solid rgba(255,71,87,0.2)' }}>
+            style={{ background: 'rgba(179,69,46,0.07)', border: '1px solid rgba(179,69,46,0.2)' }}>
             <AlertTriangle size={13} style={{ color: 'var(--red)', flexShrink: 0, marginTop: 1 }} />
             <p className="text-xs" style={{ color: 'var(--red)' }}>
               Total udhaar ({fmt(totalUdhaar)}) is more than 15% of today's revenue — consider chasing payments
@@ -516,7 +516,7 @@ export default function Analytics() {
             </div>
             {drillItem.isLowStock && (
               <div className="flex items-center gap-2 p-3 rounded-lg"
-                style={{ background: 'rgba(255,107,53,0.08)', border: '1px solid rgba(255,107,53,0.2)' }}>
+                style={{ background: 'rgba(179,69,46,0.08)', border: '1px solid rgba(179,69,46,0.2)' }}>
                 <AlertTriangle size={13} style={{ color: 'var(--orange)' }} />
                 <p className="text-xs" style={{ color: 'var(--orange)' }}>
                   Low stock — only {drillItem.quantity} {drillItem.unit} remaining (alert at {drillItem.lowStockThreshold})
@@ -661,9 +661,9 @@ export default function Analytics() {
             <>
               <div className="grid grid-cols-3 gap-2 mb-4">
                 {[
-                  { label: 'High Risk', val: riskBuckets.high.length,   sub: 'Rs.5000+',  color: 'var(--red)',    bg: 'rgba(255,71,87,0.08)',   bucket: riskBuckets.high },
-                  { label: 'Medium',    val: riskBuckets.medium.length, sub: 'Rs.1k–5k',  color: 'var(--yellow)', bg: 'rgba(255,214,10,0.08)',  bucket: riskBuckets.medium },
-                  { label: 'Low Risk',  val: riskBuckets.low.length,    sub: '< Rs.1k',   color: 'var(--accent)', bg: 'rgba(0,212,170,0.08)',   bucket: riskBuckets.low },
+                  { label: 'High Risk', val: riskBuckets.high.length,   sub: 'Rs.5000+',  color: 'var(--red)',    bg: 'rgba(179,69,46,0.08)',   bucket: riskBuckets.high },
+                  { label: 'Medium',    val: riskBuckets.medium.length, sub: 'Rs.1k–5k',  color: 'var(--yellow)', bg: 'rgba(201,154,63,0.08)',  bucket: riskBuckets.medium },
+                  { label: 'Low Risk',  val: riskBuckets.low.length,    sub: '< Rs.1k',   color: 'var(--accent)', bg: 'rgba(179,69,46,0.08)',   bucket: riskBuckets.low },
                 ].map(b => (
                   <div key={b.label} className="rounded-lg p-2.5 text-center"
                     style={{ background: b.bg, cursor: 'pointer', transition: 'opacity 0.15s' }}
@@ -766,7 +766,7 @@ export default function Analytics() {
 
         <div className="space-y-5">
           {/* Unit distribution */}
-          <SectionCard title="Items by Unit Type" icon={BarChart2} iconColor="#a855f7">
+          <SectionCard title="Items by Unit Type" icon={BarChart2} iconColor="var(--purple)">
             {Object.entries(byUnit).length === 0 ? (
               <p className="text-sm" style={{ color: 'var(--text3)' }}>No items yet.</p>
             ) : (
@@ -783,11 +783,11 @@ export default function Analytics() {
                       <span className="text-xs font-semibold w-12" style={{ color: 'var(--text2)' }}>{unit}</span>
                       <Bar
                         pct={pct}
-                        color="#a855f7"
+                        color="var(--purple)"
                         onClick={() => setDrillUnit(unit)}
                         tooltip={[
                           { label: `Unit: ${unit}`, bold: true },
-                          { label: `${count} item${count !== 1 ? 's' : ''}`, color: '#a855f7' },
+                          { label: `${count} item${count !== 1 ? 's' : ''}`, color: 'var(--purple)' },
                           { label: `${Math.round(pct)}% of inventory`, color: 'var(--text3)' },
                         ]}
                       />

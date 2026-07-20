@@ -6,14 +6,14 @@ import {
 } from '../store/orderStore'
 import toast from 'react-hot-toast'
 
-const ORANGE = '#ff6b35'
+const ORANGE = 'var(--accent)'
 
 const STATUS_META = {
-  pending:    { bg: 'rgba(255,71,87,0.1)',   color: '#FF4757', label: '⏳ Pending'     },
-  confirmed:  { bg: 'rgba(91,138,245,0.1)',  color: '#5b8af5', label: '✅ Confirmed'   },
-  picked_up:  { bg: 'rgba(255,107,53,0.1)',  color: '#ff6b35', label: '📦 Picked Up'  },
-  on_the_way: { bg: 'rgba(255,214,10,0.1)',  color: '#ffd60a', label: '🛵 On the Way' },
-  delivered:  { bg: 'rgba(0,212,170,0.1)',   color: '#00d4aa', label: '✓ Delivered'   },
+  pending:    { bg: 'rgba(179,69,46,0.1)',   color: '#FF4757', label: '⏳ Pending'     },
+  confirmed:  { bg: 'rgba(92,122,138,0.1)',  color: 'var(--blue)', label: '✅ Confirmed'   },
+  picked_up:  { bg: 'rgba(179,69,46,0.1)',  color: 'var(--accent)', label: '📦 Picked Up'  },
+  on_the_way: { bg: 'rgba(201,154,63,0.1)',  color: 'var(--gold)', label: '🛵 On the Way' },
+  delivered:  { bg: 'rgba(179,69,46,0.1)',   color: 'var(--accent)', label: '✓ Delivered'   },
 }
 
 /* ─── Single order card ───────────────────────────────────────── */
@@ -186,8 +186,8 @@ export default function Orders() {
       {pendingCount > 0 && (
         <div className="rounded-xl p-4 flex items-center gap-3"
           style={{
-            background: 'rgba(255,71,87,0.07)',
-            border: '1px solid rgba(255,71,87,0.3)',
+            background: 'rgba(179,69,46,0.07)',
+            border: '1px solid rgba(179,69,46,0.3)',
           }}>
           <AlertCircle size={18} style={{ color: 'var(--red)', flexShrink: 0 }} />
           <div className="flex-1">
@@ -227,7 +227,7 @@ export default function Orders() {
           <button key={f.key} onClick={() => setFilter(f.key)}
             className="text-xs font-semibold px-3 py-1.5 rounded-lg transition-all"
             style={{
-              background: filter === f.key ? 'rgba(255,107,53,0.15)' : 'var(--surface)',
+              background: filter === f.key ? 'rgba(179,69,46,0.15)' : 'var(--surface)',
               color:      filter === f.key ? ORANGE : 'var(--text3)',
               border:     `1px solid ${filter === f.key ? ORANGE + '60' : 'var(--border)'}`,
             }}>

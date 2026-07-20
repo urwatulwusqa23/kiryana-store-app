@@ -1,9 +1,11 @@
 import { useState } from 'react'
-import { Store, Lock } from 'lucide-react'
+import { ArrowRight, Flame } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { authApi, auth } from '../services/api'
+import GroceryBackdrop from '../components/GroceryBackdrop'
+import GroceryIllustration from '../components/GroceryIllustration'
 
-export default function Login({ onSuccess }) {
+export default function Login({ onSuccess, onCreateStore }) {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
@@ -12,8 +14,9 @@ export default function Login({ onSuccess }) {
     e.preventDefault()
     setLoading(true)
     try {
-      const { token } = await authApi.login(username, password)
+      const { token, role, storeName, fullName } = await authApi.login(username, password)
       auth.setToken(token)
+      auth.setProfile({ role, storeName, fullName })
       onSuccess()
     } catch (err) {
       toast.error(err.message || 'Login failed')
@@ -23,47 +26,80 @@ export default function Login({ onSuccess }) {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-6"
-      style={{
-        background: `radial-gradient(ellipse at 25% 25%, rgba(0,212,170,0.06) 0%, transparent 55%),
-                     radial-gradient(ellipse at 75% 75%, rgba(91,138,245,0.05) 0%, transparent 55%),
-                     var(--bg)`
-      }}>
-      <div className="w-full max-w-sm">
-        <div className="text-center mb-8">
-          <div className="w-14 h-14 rounded-2xl flex items-center justify-center text-2xl font-black mx-auto mb-4 shadow-lg"
-            style={{ background: 'linear-gradient(135deg,#00d4aa,#5b8af5)', color: '#000' }}>
-            <Store size={24} />
+    <div className="min-h-screen flex items-center justify-center p-6 relative overflow-hidden" style={{ background: 'var(--bg)' }}>
+      <GroceryBackdrop />
+      <div className="w-full max-w-4xl grid lg:grid-cols-2 overflow-hidden relative z-10"
+        style={{ borderRadius: 'var(--r-lg)', boxShadow: '0 8px 30px rgba(44,36,22,0.12)', border: '1px solid var(--border)' }}>
+
+        {/* Illustration side */}
+        <div className="hidden lg:flex flex-col p-10 relative overflow-hidden"
+          style={{ background: 'linear-gradient(165deg, #f6ddc4 0%, #f4d0bd 60%, #f0c3ba 100%)' }}>
+          <div className="flex items-center gap-2 relative z-10">
+            <Flame size={22} color="#c1392b" />
+            <p className="serif font-black" style={{ fontSize: 20, color: '#2c2416' }}>Smart Kiryana</p>
           </div>
-          <h1 className="text-xl font-black" style={{ color: 'var(--text)' }}>Owner Login</h1>
-          <p className="text-sm mt-1" style={{ color: 'var(--text3)' }}>Sign in to manage your store</p>
+
+          <div className="relative z-10 mt-8">
+            <p className="kicker mb-3" style={{ color: '#8a6a4a' }}>Est. for the neighbourhood shop</p>
+            <h2 className="serif font-black leading-tight mb-4" style={{ fontSize: 32, color: '#2c2416' }}>
+              Every counter,<br />one ledger.
+            </h2>
+            <p className="text-sm leading-relaxed" style={{ color: '#6e5238', maxWidth: 300 }}>
+              Track udhaar, inventory, billing and deliveries — all in one place.
+            </p>
+          </div>
+
+          <GroceryIllustration className="relative z-10 mt-auto -mb-6 -mx-4 w-full" />
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-3 rounded-2xl p-5"
-          style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}>
-          <input
-            className="input w-full"
-            placeholder="Username"
-            value={username}
-            onChange={e => setUsername(e.target.value)}
-            autoFocus
-            required
-          />
-          <input
-            className="input w-full"
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={e => setPassword(e.target.value)}
-            required
-          />
-          <button type="submit" disabled={loading}
-            className="w-full py-2.5 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all"
-            style={{ background: 'var(--accent)', color: '#000', opacity: loading ? 0.6 : 1 }}>
-            <Lock size={14} />
-            {loading ? 'Signing in…' : 'Sign in'}
-          </button>
-        </form>
+        {/* Form side */}
+        <div className="p-8 sm:p-12 flex flex-col justify-center" style={{ background: 'var(--surface)' }}>
+          <div className="mb-8">
+            <p className="kicker mb-2">Staff Sign-in</p>
+            <h1 className="serif" style={{ fontSize: 28, fontWeight: 900, color: 'var(--text)' }}>Welcome back</h1>
+            <p className="text-sm mt-1.5" style={{ color: 'var(--text3)' }}>Sign in to manage your store</p>
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-5">
+            <div>
+              <label className="label">Username</label>
+              <input
+                className="input"
+                style={{ border: '1px solid var(--border2)', borderRadius: 'var(--r-sm)', padding: '10px 12px', background: 'var(--surface2)' }}
+                value={username}
+                onChange={e => setUsername(e.target.value)}
+                autoFocus
+                required
+              />
+            </div>
+            <div>
+              <label className="label">Password</label>
+              <input
+                className="input"
+                style={{ border: '1px solid var(--border2)', borderRadius: 'var(--r-sm)', padding: '10px 12px', background: 'var(--surface2)' }}
+                type="password"
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+                required
+              />
+            </div>
+            <button type="submit" disabled={loading}
+              className="w-full py-2.5 font-bold text-sm flex items-center justify-center gap-2"
+              style={{ background: 'var(--accent)', color: '#faf4e6', opacity: loading ? 0.6 : 1, transition: 'var(--trans)', borderRadius: 'var(--r-sm)' }}>
+              {loading ? 'Signing in…' : 'Sign in'}
+              {!loading && <ArrowRight size={14} />}
+            </button>
+          </form>
+
+          {onCreateStore && (
+            <p className="text-center text-xs mt-6" style={{ color: 'var(--text3)' }}>
+              New shop owner?{' '}
+              <button onClick={onCreateStore} className="font-bold" style={{ color: 'var(--accent)' }}>
+                Create your store
+              </button>
+            </p>
+          )}
+        </div>
       </div>
     </div>
   )

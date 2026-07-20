@@ -5,7 +5,7 @@ using KiryanaStore.Domain.Interfaces;
 
 namespace KiryanaStore.Application.Services;
 
-public class SupplierService(IRepository<Supplier> supplierRepo) : ISupplierService
+public class SupplierService(IRepository<Supplier> supplierRepo, ICurrentUserContext currentUser) : ISupplierService
 {
     public async Task<IEnumerable<SupplierDto>> GetAllAsync()
     {
@@ -21,7 +21,7 @@ public class SupplierService(IRepository<Supplier> supplierRepo) : ISupplierServ
 
     public async Task<SupplierDto> CreateAsync(CreateSupplierDto dto)
     {
-        var entity = new Supplier { Name = dto.Name, Phone = dto.Phone, Company = dto.Company };
+        var entity = new Supplier { StoreId = currentUser.StoreId, Name = dto.Name, Phone = dto.Phone, Company = dto.Company };
         var created = await supplierRepo.AddAsync(entity);
         return MapToDto(created);
     }

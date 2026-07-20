@@ -7,7 +7,7 @@ services:
       POSTGRES_PASSWORD: "${POSTGRES_PASSWORD:-devlocal123}"
       POSTGRES_DB: kiryanadb
     ports:
-      - "5432:5432"
+      - "15432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
@@ -25,6 +25,10 @@ services:
     environment:
       ConnectionStrings__DefaultConnection: "Host=postgres;Port=5432;Database=kiryanadb;Username=kiryana;Password=${POSTGRES_PASSWORD:-devlocal123}"
       ASPNETCORE_URLS: "http://+:8080"
+      Jwt__Secret: "${JWT_SECRET:-dev-only-secret-change-me-in-production-min-32-chars}"
+      Jwt__Issuer: "KiryanaStore"
+      Cors__AllowedOrigins__0: "http://localhost:13000"
+      Cors__AllowedOrigins__1: "http://localhost:3000"
     ports:
       - "18080:8080"
     depends_on:

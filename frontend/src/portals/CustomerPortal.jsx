@@ -9,15 +9,15 @@ import {
 } from '../store/orderStore'
 import toast from 'react-hot-toast'
 
-const ORANGE = '#ff6b35'
+const ORANGE = 'var(--accent)'
 const STORE  = { name: 'Ahmed General Store', area: 'Gulberg III, Lahore', phone: '03XX-1234567' }
 
 const STATUS_META = {
-  pending:    { bg: 'rgba(255,214,10,0.12)',  color: '#ffd60a', label: '⏳ Waiting'     },
-  confirmed:  { bg: 'rgba(91,138,245,0.12)', color: '#5b8af5', label: '✅ Confirmed'   },
-  picked_up:  { bg: 'rgba(255,107,53,0.12)', color: '#ff6b35', label: '📦 Picked Up'  },
-  on_the_way: { bg: 'rgba(255,214,10,0.12)', color: '#ffd60a', label: '🛵 On the Way' },
-  delivered:  { bg: 'rgba(0,212,170,0.12)',  color: '#00d4aa', label: '✓ Delivered'   },
+  pending:    { bg: 'rgba(201,154,63,0.12)',  color: 'var(--gold)', label: '⏳ Waiting'     },
+  confirmed:  { bg: 'rgba(92,122,138,0.12)', color: 'var(--blue)', label: '✅ Confirmed'   },
+  picked_up:  { bg: 'rgba(179,69,46,0.12)', color: 'var(--accent)', label: '📦 Picked Up'  },
+  on_the_way: { bg: 'rgba(201,154,63,0.12)', color: 'var(--gold)', label: '🛵 On the Way' },
+  delivered:  { bg: 'rgba(179,69,46,0.12)',  color: 'var(--accent)', label: '✓ Delivered'   },
 }
 
 /* ─── Shell ──────────────────────────────────────────────────── */
@@ -253,7 +253,7 @@ function BrowseStore({ onOrderPlaced }) {
     <div className="p-4 space-y-4">
       {/* WhatsApp banner */}
       <div className="flex items-center gap-3 px-4 py-3 rounded-xl"
-        style={{ background: 'rgba(0,212,170,0.06)', border: '1px solid rgba(0,212,170,0.2)' }}>
+        style={{ background: 'rgba(179,69,46,0.06)', border: '1px solid rgba(179,69,46,0.2)' }}>
         <MessageCircle size={18} style={{ color: 'var(--accent)', flexShrink: 0 }} />
         <div>
           <p className="text-xs font-semibold" style={{ color: 'var(--accent)' }}>
@@ -518,7 +518,7 @@ function TrackOrder({ saleId }) {
         {/* Rider assigned banner */}
         {orderState?.riderName && status !== 'pending' && (
           <div className="mb-5 px-3 py-2.5 rounded-xl flex items-center gap-2"
-            style={{ background: 'rgba(0,212,170,0.07)', border: '1px solid rgba(0,212,170,0.2)' }}>
+            style={{ background: 'rgba(179,69,46,0.07)', border: '1px solid rgba(179,69,46,0.2)' }}>
             <span className="text-lg">🛵</span>
             <div>
               <p className="text-xs font-bold" style={{ color: 'var(--accent)' }}>

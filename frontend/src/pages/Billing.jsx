@@ -9,34 +9,28 @@ const fmt = n => `Rs. ${Number(n || 0).toLocaleString()}`
 
 function CartItem({ item, qty, onInc, onDec, onRemove }) {
   return (
-    <div className="flex items-center gap-3 py-3" style={{ borderBottom: '1px solid var(--border)' }}>
+    <div className="flex items-center gap-3 py-3" style={{ borderBottom: '1px dashed var(--border2)' }}>
       <div className="flex-1 min-w-0">
         <p className="text-sm font-medium truncate" style={{ color: 'var(--text)' }}>{item.name}</p>
-        <p className="text-xs" style={{ color: 'var(--text3)' }}>Rs. {item.sellingPrice} / {item.unit}</p>
+        <p className="mono text-xs" style={{ color: 'var(--text3)' }}>Rs. {item.sellingPrice} / {item.unit}</p>
       </div>
       <div className="flex items-center gap-2">
         <button onClick={onDec}
-          className="w-7 h-7 rounded-full flex items-center justify-center transition-colors"
-          style={{ background: 'var(--surface3)', color: 'var(--text2)' }}
-          onMouseEnter={e => { e.currentTarget.style.background = 'var(--border2)' }}
-          onMouseLeave={e => { e.currentTarget.style.background = 'var(--surface3)' }}>
+          className="w-6 h-6 flex items-center justify-center"
+          style={{ background: 'var(--surface3)', color: 'var(--text2)' }}>
           <Minus size={12} />
         </button>
-        <span className="w-8 text-center text-sm font-bold" style={{ color: 'var(--text)' }}>{qty}</span>
+        <span className="mono w-6 text-center text-sm font-bold" style={{ color: 'var(--text)' }}>{qty}</span>
         <button onClick={onInc} disabled={qty >= item.quantity}
-          className="w-7 h-7 rounded-full flex items-center justify-center transition-colors disabled:opacity-40"
-          style={{ background: 'rgba(0,212,170,0.15)', color: 'var(--accent)' }}
-          onMouseEnter={e => { if (qty < item.quantity) e.currentTarget.style.background = 'rgba(0,212,170,0.25)' }}
-          onMouseLeave={e => { e.currentTarget.style.background = 'rgba(0,212,170,0.15)' }}>
+          className="w-6 h-6 flex items-center justify-center disabled:opacity-40"
+          style={{ background: 'rgba(179,69,46,0.15)', color: 'var(--accent)' }}>
           <Plus size={12} />
         </button>
       </div>
       <div className="w-20 text-right">
-        <p className="text-sm font-bold" style={{ color: 'var(--text)' }}>Rs. {(item.sellingPrice * qty).toLocaleString()}</p>
+        <p className="mono text-sm font-bold" style={{ color: 'var(--text)' }}>Rs. {(item.sellingPrice * qty).toLocaleString()}</p>
       </div>
-      <button onClick={onRemove} className="transition-colors" style={{ color: 'var(--text3)' }}
-        onMouseEnter={e => { e.currentTarget.style.color = 'var(--red)' }}
-        onMouseLeave={e => { e.currentTarget.style.color = 'var(--text3)' }}>
+      <button onClick={onRemove} style={{ color: 'var(--text3)' }}>
         <Trash2 size={14} />
       </button>
     </div>
@@ -121,42 +115,41 @@ export default function Billing() {
 
   if (loading) return (
     <div className="flex items-center justify-center h-64">
-      <div className="w-10 h-10 rounded-full border-2 animate-spin"
-        style={{ borderColor: 'var(--border2)', borderTopColor: 'var(--accent)' }} />
+      <div className="spinner spinner-accent w-10 h-10" />
     </div>
   )
 
   if (receipt) return (
     <div className="max-w-sm mx-auto">
-      <div className="card text-center">
-        <div className="w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-4"
-          style={{ background: 'rgba(0,212,170,0.15)' }}>
-          <CheckCircle size={28} style={{ color: 'var(--accent)' }} />
+      <div className="card" style={{ borderTop: '3px solid var(--forest)' }}>
+        <div className="text-center">
+          <CheckCircle size={28} style={{ color: 'var(--forest)' }} className="mx-auto mb-3" />
+          <p className="kicker">Sale Complete</p>
+          <p className="serif font-bold" style={{ fontSize: 20, color: 'var(--text)' }}>Receipt #{receipt.id}</p>
         </div>
-        <h2 className="text-xl font-extrabold" style={{ color: 'var(--text)' }}>Sale Complete!</h2>
-        <p className="text-sm mt-1" style={{ color: 'var(--text3)' }}>Receipt #{receipt.id}</p>
-        <div className="mt-4 text-left pt-4 space-y-2" style={{ borderTop: '1px solid var(--border)' }}>
+        <div className="mt-5 space-y-1.5 mono">
           {receipt.items?.map(i => (
             <div key={i.itemId} className="flex justify-between text-sm">
-              <span style={{ color: 'var(--text2)' }}>{i.itemName} × {i.quantity}</span>
-              <span className="font-medium" style={{ color: 'var(--text)' }}>Rs. {(i.unitPrice * i.quantity).toLocaleString()}</span>
+              <span style={{ color: 'var(--text2)' }}>{i.itemName} ×{i.quantity}</span>
+              <span style={{ color: 'var(--text)' }}>{(i.unitPrice * i.quantity).toLocaleString()}</span>
             </div>
           ))}
         </div>
-        <div className="mt-4 pt-4 space-y-1" style={{ borderTop: '1px solid var(--border)' }}>
+        <hr className="rule-dashed my-4" />
+        <div className="space-y-1 mono">
           <div className="flex justify-between font-bold text-lg">
-            <span style={{ color: 'var(--text)' }}>Total</span>
+            <span style={{ color: 'var(--text)' }}>TOTAL</span>
             <span style={{ color: 'var(--accent)' }}>Rs. {receipt.totalRevenue?.toLocaleString()}</span>
           </div>
           <div className="flex justify-between text-sm">
             <span style={{ color: 'var(--text3)' }}>Profit</span>
             <span style={{ color: 'var(--blue)' }}>Rs. {receipt.profit?.toLocaleString()}</span>
           </div>
-          <p className="text-xs" style={{ color: 'var(--text3)' }}>
+          <p className="text-xs pt-1" style={{ color: 'var(--text3)' }}>
             {receipt.customerName} · {new Date(receipt.saleDate).toLocaleString()}
           </p>
         </div>
-        <button className="btn-primary w-full mt-4 justify-center" onClick={() => setReceipt(null)}>
+        <button className="btn-primary w-full mt-5 justify-center" onClick={() => setReceipt(null)}>
           New Sale
         </button>
       </div>
@@ -176,9 +169,9 @@ export default function Billing() {
       {/* Products */}
       <div className="lg:col-span-3 space-y-4">
         <div>
-          <p className="text-sm mb-2" style={{ color: 'var(--text3)' }}>{items.length} items available</p>
+          <p className="kicker mb-2">{items.length} items available</p>
           <div className="flex gap-2">
-            <div className="flex items-center gap-2 flex-1 px-3 py-2 rounded-lg" style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}>
+            <div className="flex items-center gap-2 flex-1 px-3 py-2" style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}>
               <Search size={14} style={{ color: 'var(--text3)' }} />
               <input className="flex-1 outline-none text-sm bg-transparent"
                 style={{ color: 'var(--text)', fontFamily: 'inherit' }}
@@ -187,8 +180,8 @@ export default function Billing() {
             </div>
             <button
               onClick={() => setScanning(true)}
-              className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-semibold flex-shrink-0"
-              style={{ background: 'rgba(0,212,170,0.1)', color: 'var(--accent)', border: '1px solid rgba(0,212,170,0.25)' }}
+              className="flex items-center gap-1.5 px-3 py-2 text-sm font-semibold flex-shrink-0"
+              style={{ background: 'transparent', color: 'var(--gold)', border: '1px solid var(--gold)' }}
               title="Scan barcode to add item">
               <ScanLine size={15} /> Scan
             </button>
@@ -199,16 +192,15 @@ export default function Billing() {
             const inCart = !!cart[item.id]
             return (
               <button key={item.id} onClick={() => addToCart(item)}
-                className="text-left p-3 rounded-xl transition-all"
+                className="text-left p-3"
                 style={{
-                  background: inCart ? 'rgba(0,212,170,0.06)' : 'var(--surface)',
-                  border: `1px solid ${inCart ? 'rgba(0,212,170,0.4)' : 'var(--border)'}`,
-                }}
-                onMouseEnter={e => { if (!inCart) e.currentTarget.style.borderColor = 'var(--border2)' }}
-                onMouseLeave={e => { if (!inCart) e.currentTarget.style.borderColor = 'var(--border)' }}>
+                  background: inCart ? 'var(--surface2)' : 'var(--surface)',
+                  border: `1px solid ${inCart ? 'var(--accent)' : 'var(--border)'}`,
+                  transition: 'var(--trans)',
+                }}>
                 <p className="text-sm font-semibold truncate" style={{ color: 'var(--text)' }}>{item.name}</p>
                 <p className="text-xs mt-0.5" style={{ color: 'var(--text3)' }}>{item.quantity} {item.unit} left</p>
-                <p className="text-base font-extrabold mt-1.5" style={{ color: 'var(--accent)' }}>Rs. {item.sellingPrice}</p>
+                <p className="numeral text-base font-bold mt-1.5" style={{ color: 'var(--accent)' }}>Rs. {item.sellingPrice}</p>
                 {cart[item.id] && (
                   <span className="badge-green mt-1">{cart[item.id]} in cart</span>
                 )}
@@ -218,12 +210,12 @@ export default function Billing() {
         </div>
       </div>
 
-      {/* Cart */}
+      {/* Cart — register receipt */}
       <div className="lg:col-span-2">
         <div className="card sticky top-4">
-          <div className="flex items-center gap-2 mb-4">
-            <ShoppingCart size={18} style={{ color: 'var(--accent)' }} />
-            <h3 className="font-bold" style={{ color: 'var(--text)' }}>Cart ({cartItems.length} items)</h3>
+          <div className="flex items-center gap-2 mb-4 pb-3" style={{ borderBottom: '1px solid var(--border)' }}>
+            <ShoppingCart size={16} style={{ color: 'var(--accent)' }} />
+            <h3 className="serif font-bold" style={{ fontSize: 16, color: 'var(--text)' }}>Cart · {cartItems.length} items</h3>
           </div>
 
           <div>
@@ -246,20 +238,23 @@ export default function Billing() {
           </div>
 
           {cartItems.length > 0 && (
-            <div className="mt-4 pt-4 space-y-2" style={{ borderTop: '1px solid var(--border)' }}>
-              <div className="flex justify-between text-sm" style={{ color: 'var(--text2)' }}>
-                <span>Items</span>
-                <span>{cartItems.reduce((s, { qty }) => s + qty, 0)}</span>
+            <div className="mt-2">
+              <hr className="rule-dashed mb-3" />
+              <div className="mono space-y-1.5">
+                <div className="flex justify-between text-sm" style={{ color: 'var(--text2)' }}>
+                  <span>Items</span>
+                  <span>{cartItems.reduce((s, { qty }) => s + qty, 0)}</span>
+                </div>
+                <div className="flex justify-between font-bold text-lg">
+                  <span style={{ color: 'var(--text)' }}>TOTAL</span>
+                  <span style={{ color: 'var(--accent)' }}>Rs. {total.toLocaleString()}</span>
+                </div>
+                <div className="flex justify-between text-xs" style={{ color: 'var(--text3)' }}>
+                  <span>Profit</span>
+                  <span>Rs. {profit.toLocaleString()}</span>
+                </div>
               </div>
-              <div className="flex justify-between font-extrabold text-lg">
-                <span style={{ color: 'var(--text)' }}>Total</span>
-                <span style={{ color: 'var(--accent)' }}>Rs. {total.toLocaleString()}</span>
-              </div>
-              <div className="flex justify-between text-xs" style={{ color: 'var(--text3)' }}>
-                <span>Profit</span>
-                <span>Rs. {profit.toLocaleString()}</span>
-              </div>
-              <button className="btn-primary w-full mt-2 justify-center py-3 text-base font-bold"
+              <button className="btn-primary w-full mt-3 justify-center py-3 text-base font-bold"
                 onClick={handleCheckout} disabled={submitting}>
                 {submitting ? 'Processing...' : `Checkout · ${fmt(total)}`}
               </button>

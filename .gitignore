@@ -26,3 +26,4 @@ Thumbs.db
 
 # Local generated files
 submission_answers.pdf
+docker-compose.override.yml

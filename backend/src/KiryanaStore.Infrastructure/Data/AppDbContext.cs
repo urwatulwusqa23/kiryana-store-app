@@ -1,10 +1,14 @@
 using KiryanaStore.Domain.Entities;
+using KiryanaStore.Domain.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace KiryanaStore.Infrastructure.Data;
 
-public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options)
+public class AppDbContext(DbContextOptions<AppDbContext> options, ICurrentUserContext currentUser) : DbContext(options)
 {
+    public DbSet<Store> Stores => Set<Store>();
+    public DbSet<User> Users => Set<User>();
+    public DbSet<CustomerAccount> CustomerAccounts => Set<CustomerAccount>();
     public DbSet<Customer> Customers => Set<Customer>();
     public DbSet<CreditTransaction> CreditTransactions => Set<CreditTransaction>();
     public DbSet<Item> Items => Set<Item>();
@@ -16,6 +20,18 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        // Tenant isolation: every store-scoped query is automatically filtered to the
+        // caller's StoreId (from the JWT via ICurrentUserContext). Auth lookups that must
+        // run before a StoreId is known use .IgnoreQueryFilters() explicitly.
+        modelBuilder.Entity<Customer>().HasQueryFilter(c => c.StoreId == currentUser.StoreId);
+        modelBuilder.Entity<Item>().HasQueryFilter(i => i.StoreId == currentUser.StoreId);
+        modelBuilder.Entity<Supplier>().HasQueryFilter(s => s.StoreId == currentUser.StoreId);
+        modelBuilder.Entity<Purchase>().HasQueryFilter(p => p.StoreId == currentUser.StoreId);
+        modelBuilder.Entity<Sale>().HasQueryFilter(s => s.StoreId == currentUser.StoreId);
+        modelBuilder.Entity<CreditTransaction>().HasQueryFilter(t => t.StoreId == currentUser.StoreId);
+        modelBuilder.Entity<User>().HasQueryFilter(u => u.StoreId == currentUser.StoreId);
+        modelBuilder.Entity<CustomerAccount>().HasQueryFilter(c => c.StoreId == currentUser.StoreId);
+
         modelBuilder.Entity<CreditTransaction>()
             .Property(t => t.Type)
             .HasConversion<string>();

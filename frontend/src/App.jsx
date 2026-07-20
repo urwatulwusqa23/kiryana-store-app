@@ -3,7 +3,8 @@ import { BrowserRouter, Routes, Route, NavLink, useLocation } from 'react-router
 import { Toaster } from 'react-hot-toast'
 import {
   LayoutDashboard, Users, Package, Truck, ShoppingCart,
-  BarChart2, Menu, Store, ShoppingBag, ChevronRight, LogOut, X, MessageCircle, BookOpen,
+  BarChart2, Menu, ShoppingBag, ArrowRight, LogOut, X, MessageCircle, BookOpen, UserCog,
+  Store, Bike, Check, Flame,
 } from 'lucide-react'
 import Dashboard  from './pages/Dashboard'
 import Customers  from './pages/Customers'
@@ -14,9 +15,12 @@ import Analytics  from './pages/Analytics'
 import WhatsAppReminders from './pages/WhatsAppReminders'
 import Orders            from './pages/Orders'
 import KharchaKhata      from './pages/KharchaKhata'
+import Staff             from './pages/Staff'
 import CustomerPortal from './portals/CustomerPortal'
 import RiderPortal    from './portals/RiderPortal'
 import Login          from './pages/Login'
+import Signup         from './pages/Signup'
+import GroceryBackdrop from './components/GroceryBackdrop'
 import { getPendingCount } from './store/orderStore'
 import { auth } from './services/api'
 
@@ -24,103 +28,103 @@ import { auth } from './services/api'
 const PORTALS = [
   {
     key: 'owner',
-    emoji: '🏪',
-    accent: '#00d4aa',
-    glow: 'rgba(0,212,170,0.08)',
-    border: 'rgba(0,212,170,0.25)',
+    icon: Store,
     title: 'Owner Portal',
-    sub: 'Manage inventory, udhaar, billing, suppliers & analytics',
-    badge: 'Full Management',
+    sub: 'Inventory, udhaar, billing, suppliers & analytics — the full ledger.',
+    badge: 'Management',
+    color: 'var(--accent)',
+    tint: '#faece9',
   },
   {
     key: 'customer',
-    emoji: '🛒',
-    accent: '#ff6b35',
-    glow: 'rgba(255,107,53,0.08)',
-    border: 'rgba(255,107,53,0.25)',
+    icon: ShoppingBag,
     title: 'Customer Portal',
-    sub: 'Browse & order from the store, track your delivery live',
-    badge: 'Shop Online',
+    sub: 'Browse the store, place an order, track your delivery live.',
+    badge: 'Shop',
+    color: 'var(--gold)',
+    tint: '#fbf1dc',
   },
   {
     key: 'rider',
-    emoji: '🛵',
-    accent: '#ffd60a',
-    glow: 'rgba(255,214,10,0.08)',
-    border: 'rgba(255,214,10,0.25)',
+    icon: Bike,
     title: 'Rider Portal',
-    sub: 'View assigned deliveries, update status & track earnings',
-    badge: 'Deliveries',
+    sub: 'View assigned deliveries, update status, track earnings.',
+    badge: 'Delivery',
+    color: 'var(--forest)',
+    tint: '#eaf3e6',
   },
 ]
 
 /* ─── Portal Selector ────────────────────────────────────────── */
 function PortalSelect({ onSelect }) {
-  const [hovered, setHovered] = useState(null)
+  const [hover, setHover] = useState(null)
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-6"
-      style={{
-        background: `radial-gradient(ellipse at 25% 25%, rgba(0,212,170,0.06) 0%, transparent 55%),
-                     radial-gradient(ellipse at 75% 75%, rgba(91,138,245,0.05) 0%, transparent 55%),
-                     var(--bg)`
-      }}>
-      <div className="w-full max-w-md">
-        {/* Logo */}
-        <div className="text-center mb-10">
-          <div className="w-16 h-16 rounded-2xl flex items-center justify-center text-3xl font-black mx-auto mb-4 shadow-lg"
-            style={{ background: 'linear-gradient(135deg,#00d4aa,#5b8af5)', color: '#000' }}>
-            K
+    <div className="min-h-screen flex flex-col items-center justify-center p-6 relative overflow-hidden" style={{ background: 'var(--bg)' }}>
+      <GroceryBackdrop />
+      <div className="w-full max-w-3xl relative z-10">
+        {/* Masthead */}
+        <div className="text-center mb-12">
+          <div className="inline-flex items-center gap-2 mb-4 px-3 py-1.5"
+            style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 999 }}>
+            <Flame size={14} color="var(--accent)" />
+            <p className="kicker" style={{ color: 'var(--text2)' }}>Smart Kiryana</p>
           </div>
-          <h1 className="text-2xl font-black" style={{ color: 'var(--text)' }}>Smart Kiryana</h1>
-          <p className="text-sm mt-1.5" style={{ color: 'var(--text3)' }}>Choose your portal to continue</p>
+          <h1 className="serif" style={{ fontSize: 36, fontWeight: 900, color: 'var(--text)', lineHeight: 1.15 }}>
+            How would you like to continue?
+          </h1>
+          <p className="text-sm mt-3" style={{ color: 'var(--text3)' }}>
+            Pick a portal — we'll take you straight there.
+          </p>
         </div>
 
-        <div className="space-y-3">
-          {PORTALS.map(p => (
-            <button key={p.key}
-              onClick={() => onSelect(p.key)}
-              onMouseEnter={() => setHovered(p.key)}
-              onMouseLeave={() => setHovered(null)}
-              className="w-full flex items-center gap-4 p-4 rounded-2xl text-left transition-all duration-200 relative overflow-hidden"
-              style={{
-                background: hovered === p.key
-                  ? `radial-gradient(ellipse at top left, ${p.glow}, transparent 70%), var(--surface)`
-                  : 'var(--surface)',
-                border: `1px solid ${hovered === p.key ? p.border : 'var(--border)'}`,
-                transform: hovered === p.key ? 'translateY(-2px)' : 'none',
-                boxShadow: hovered === p.key ? '0 8px 32px rgba(0,0,0,0.35)' : 'none',
-              }}>
-              {/* Icon */}
-              <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 text-2xl"
-                style={{ background: `${p.accent}1a`, border: `1px solid ${p.accent}30` }}>
-                {p.emoji}
-              </div>
-              {/* Text */}
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-0.5">
-                  <p className="font-bold text-sm" style={{ color: p.accent }}>{p.title}</p>
-                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-md"
-                    style={{ background: `${p.accent}1a`, color: p.accent }}>
-                    {p.badge}
-                  </span>
+        {/* Card grid */}
+        <div className="grid sm:grid-cols-3 gap-4">
+          {PORTALS.map(p => {
+            const Icon = p.icon
+            const active = hover === p.key
+            return (
+              <button key={p.key}
+                onClick={() => onSelect(p.key)}
+                onMouseEnter={() => setHover(p.key)}
+                onMouseLeave={() => setHover(null)}
+                className="relative text-left p-5 flex flex-col"
+                style={{
+                  background: 'var(--surface)',
+                  border: `1.5px solid ${active ? p.color : 'var(--border)'}`,
+                  borderRadius: 'var(--r-lg)',
+                  boxShadow: active ? '0 6px 20px rgba(44,36,22,0.10)' : 'var(--shadow)',
+                  transform: active ? 'translateY(-2px)' : 'none',
+                  transition: 'var(--trans)',
+                }}>
+                <span className="absolute top-4 right-4 w-5 h-5 rounded-full flex items-center justify-center"
+                  style={{ border: `1.5px solid ${active ? p.color : 'var(--border2)'}`, background: active ? p.color : 'transparent' }}>
+                  {active && <Check size={12} color="#fff" strokeWidth={3} />}
+                </span>
+
+                <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-4"
+                  style={{ background: p.tint }}>
+                  <Icon size={22} color={p.color} />
                 </div>
-                <p className="text-xs leading-snug" style={{ color: 'var(--text3)' }}>{p.sub}</p>
-              </div>
-              <ChevronRight size={16} style={{ color: 'var(--text3)', flexShrink: 0 }} />
-            </button>
-          ))}
+
+                <p className="serif font-bold mb-1.5" style={{ fontSize: 16, color: 'var(--text)' }}>{p.title}</p>
+                <p className="text-xs leading-relaxed mb-4" style={{ color: 'var(--text3)' }}>{p.sub}</p>
+
+                <span className="mt-auto kicker" style={{ color: p.color }}>{p.badge}</span>
+              </button>
+            )
+          })}
         </div>
 
-        <p className="text-center text-xs mt-8" style={{ color: 'var(--text3)' }}>
-          Ahmed General Store · Gulberg III, Lahore
-        </p>
+        <p className="text-center kicker mt-10">One ledger. Every counter.</p>
       </div>
     </div>
   )
 }
 
 /* ─── Owner Portal nav ───────────────────────────────────────── */
+// `ownerOnly` items are hidden from Employee accounts. The backend enforces this for real
+// (403 on the API) — this is UX only, so a curious Employee doesn't even see the door.
 const navGroups = [
   {
     label: 'Main',
@@ -136,21 +140,32 @@ const navGroups = [
       { to: '/customers',    icon: Users,          label: 'Udhaar Book' },
       { to: '/wa-reminders', icon: MessageCircle,   label: 'Reminders' },
       { to: '/inventory',    icon: Package,         label: 'Inventory' },
-      { to: '/suppliers',    icon: Truck,           label: 'Suppliers' },
+      { to: '/suppliers',    icon: Truck,           label: 'Suppliers', ownerOnly: true },
     ]
   },
   {
     label: 'Insights',
     items: [
-      { to: '/analytics',       icon: BarChart2, label: 'Analytics'      },
-      { to: '/kharcha-khata',   icon: BookOpen,  label: 'Kharcha Khata'  },
+      { to: '/analytics',       icon: BarChart2, label: 'Analytics',     ownerOnly: true },
+      { to: '/kharcha-khata',   icon: BookOpen,  label: 'Kharcha Khata', ownerOnly: true },
+    ]
+  },
+  {
+    label: 'Store',
+    items: [
+      { to: '/staff', icon: UserCog, label: 'Staff & Riders', ownerOnly: true },
     ]
   }
 ]
 
-const allNavItems = navGroups.flatMap(g => g.items)
+function navGroupsForRole(role) {
+  return navGroups
+    .map(g => ({ ...g, items: g.items.filter(i => !i.ownerOnly || role === 'Owner') }))
+    .filter(g => g.items.length > 0)
+}
 
-function Sidebar({ open, onClose, onSwitch }) {
+function Sidebar({ open, onClose, onSwitch, role }) {
+  const groups = navGroupsForRole(role)
   const [pendingCount, setPendingCount] = useState(0)
 
   useEffect(() => {
@@ -171,54 +186,41 @@ function Sidebar({ open, onClose, onSwitch }) {
       <aside className={`fixed top-0 left-0 h-full z-30 flex flex-col
         transform transition-transform duration-300
         ${open ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0 lg:static lg:block`}
-        style={{ width: 220, background: 'var(--surface)', borderRight: '1px solid var(--border)' }}>
+        style={{ width: 224, background: 'var(--surface)', borderRight: '1px solid var(--border)' }}>
 
-        {/* Logo */}
-        <div className="p-5 flex items-center justify-between" style={{ borderBottom: '1px solid var(--border)' }}>
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl flex items-center justify-center text-lg font-black"
-              style={{ background: 'linear-gradient(135deg,#00d4aa,#5b8af5)', color: '#000' }}>
-              K
-            </div>
-            <div>
-              <p className="font-extrabold text-sm leading-tight" style={{ color: 'var(--text)' }}>Smart Kiryana</p>
-              <p className="text-[10px] font-semibold uppercase tracking-widest mt-0.5" style={{ color: 'var(--text3)' }}>
-                Owner Portal
-              </p>
-            </div>
+        {/* Wordmark */}
+        <div className="px-5 py-5 flex items-center justify-between" style={{ borderBottom: '1px solid var(--border)' }}>
+          <div>
+            <p className="serif font-bold leading-tight" style={{ fontSize: 19, color: 'var(--text)' }}>Smart Kiryana</p>
+            <p className="kicker mt-0.5">{role === 'Owner' ? 'Owner Portal' : 'Staff Portal'}</p>
           </div>
-          <button className="lg:hidden p-1 rounded-lg" style={{ color: 'var(--text3)' }} onClick={onClose}>
+          <button className="lg:hidden p-1" style={{ color: 'var(--text3)' }} onClick={onClose}>
             <X size={16} />
           </button>
         </div>
 
         {/* Nav */}
         <nav className="flex-1 p-3 overflow-y-auto space-y-4">
-          {navGroups.map(group => (
+          {groups.map(group => (
             <div key={group.label}>
-              <p className="text-[10px] font-bold uppercase tracking-widest px-3 mb-1"
-                style={{ color: 'var(--text3)' }}>
-                {group.label}
-              </p>
+              <p className="kicker px-3 mb-1">{group.label}</p>
               {group.items.map(({ to, icon: Icon, label }) => {
                 const badge = to === '/orders' ? pendingCount : 0
                 return (
                   <NavLink key={to} to={to} end={to === '/'}
-                    className={({ isActive }) =>
-                      `flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-medium transition-all mb-0.5 ${
-                        isActive ? 'active-nav' : 'inactive-nav'
-                      }`
-                    }
+                    className="flex items-center gap-2.5 px-3 py-2.5 text-sm font-medium mb-0.5"
                     style={({ isActive }) => ({
-                      background: isActive ? 'rgba(0,212,170,0.1)' : 'transparent',
+                      background: isActive ? 'var(--surface3)' : 'transparent',
                       color: isActive ? 'var(--accent)' : 'var(--text2)',
+                      borderLeft: isActive ? '2px solid var(--accent)' : '2px solid transparent',
+                      transition: 'var(--trans)',
                     })}
                     onClick={onClose}>
                     <Icon size={15} />
                     <span className="flex-1">{label}</span>
                     {badge > 0 && (
-                      <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full leading-none"
-                        style={{ background: 'var(--red)', color: '#fff' }}>
+                      <span className="text-[10px] font-bold px-1.5 leading-tight"
+                        style={{ background: 'var(--accent)', color: '#f3ede1' }}>
                         {badge}
                       </span>
                     )}
@@ -229,24 +231,19 @@ function Sidebar({ open, onClose, onSwitch }) {
           ))}
         </nav>
 
-        {/* Footer */}
+        {/* Footer nameplate */}
         <div className="p-3 space-y-1" style={{ borderTop: '1px solid var(--border)' }}>
-          <div className="flex items-center gap-3 px-3 py-2.5 rounded-lg"
-            style={{ background: 'var(--surface2)' }}>
-            <div className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
-              style={{ background: 'rgba(0,212,170,0.12)' }}>
-              <Store size={14} style={{ color: 'var(--accent)' }} />
-            </div>
-            <div className="min-w-0">
-              <p className="text-xs font-semibold truncate" style={{ color: 'var(--text)' }}>Ahmed General Store</p>
-              <p className="text-[10px]" style={{ color: 'var(--text3)' }}>Gulberg III, Lahore</p>
-            </div>
+          <div className="px-3 py-3" style={{ background: 'var(--surface2)', borderLeft: '2px solid var(--gold)' }}>
+            <p className="text-xs font-semibold truncate" style={{ color: 'var(--text)' }}>
+              {auth.getProfile()?.storeName || 'Your Store'}
+            </p>
+            <p className="text-[10px] mt-0.5" style={{ color: 'var(--text3)' }}>{auth.getProfile()?.fullName || role}</p>
           </div>
           <button onClick={onSwitch}
-            className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium transition-all"
-            style={{ color: 'var(--text3)' }}
-            onMouseEnter={e => { e.currentTarget.style.background = 'var(--surface2)'; e.currentTarget.style.color = 'var(--text2)' }}
-            onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--text3)' }}>
+            className="w-full flex items-center gap-2 px-3 py-2 text-xs font-medium"
+            style={{ color: 'var(--text3)', transition: 'var(--trans)' }}
+            onMouseEnter={e => { e.currentTarget.style.color = 'var(--text2)' }}
+            onMouseLeave={e => { e.currentTarget.style.color = 'var(--text3)' }}>
             <LogOut size={13} />
             Switch Portal
           </button>
@@ -256,40 +253,42 @@ function Sidebar({ open, onClose, onSwitch }) {
   )
 }
 
-function OwnerLayout({ onSwitch }) {
+function OwnerLayout({ onSwitch, role }) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const location = useLocation()
+  const allNavItems = navGroupsForRole(role).flatMap(g => g.items)
   const current = allNavItems.find(n =>
     n.to === location.pathname || (n.to !== '/' && location.pathname.startsWith(n.to))
   )
   const today = new Date().toLocaleDateString('en-PK', {
     weekday: 'short', day: 'numeric', month: 'short', year: 'numeric'
   })
+  const isOwner = role === 'Owner'
 
   return (
     <div className="flex h-screen overflow-hidden" style={{ background: 'var(--bg)' }}>
-      <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} onSwitch={onSwitch} />
+      <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} onSwitch={onSwitch} role={role} />
 
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         {/* Topbar */}
-        <header className="flex items-center justify-between px-5 py-3 flex-shrink-0"
+        <header className="flex items-center justify-between px-5 py-3.5 flex-shrink-0"
           style={{ background: 'var(--surface)', borderBottom: '1px solid var(--border)' }}>
           <div className="flex items-center gap-3">
-            <button className="lg:hidden p-1.5 rounded-lg transition-colors"
+            <button className="lg:hidden p-1.5"
               style={{ color: 'var(--text3)' }}
               onClick={() => setSidebarOpen(true)}>
               <Menu size={20} />
             </button>
             <div>
-              <h1 className="font-extrabold text-base leading-tight" style={{ color: 'var(--text)' }}>
+              <h1 className="serif font-bold leading-tight" style={{ fontSize: 18, color: 'var(--text)' }}>
                 {current?.label || 'Dashboard'}
               </h1>
               <p className="text-xs hidden sm:block" style={{ color: 'var(--text3)' }}>{today}</p>
             </div>
           </div>
-          <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full animate-pulse" style={{ background: 'var(--accent)' }} />
-            <span className="text-xs hidden sm:block" style={{ color: 'var(--text3)' }}>Live</span>
+          <div className="flex items-center gap-1.5">
+            <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: 'var(--forest)' }} />
+            <span className="kicker">Live</span>
           </div>
         </header>
 
@@ -299,11 +298,12 @@ function OwnerLayout({ onSwitch }) {
             <Route path="/orders"    element={<Orders />} />
             <Route path="/customers" element={<Customers />} />
             <Route path="/inventory" element={<Inventory />} />
-            <Route path="/suppliers" element={<Suppliers />} />
             <Route path="/billing"   element={<Billing />} />
-            <Route path="/analytics"      element={<Analytics />} />
             <Route path="/wa-reminders"   element={<WhatsAppReminders />} />
-            <Route path="/kharcha-khata"  element={<KharchaKhata />} />
+            {isOwner && <Route path="/suppliers" element={<Suppliers />} />}
+            {isOwner && <Route path="/analytics" element={<Analytics />} />}
+            {isOwner && <Route path="/kharcha-khata" element={<KharchaKhata />} />}
+            {isOwner && <Route path="/staff" element={<Staff />} />}
           </Routes>
         </main>
       </div>
@@ -313,17 +313,18 @@ function OwnerLayout({ onSwitch }) {
 
 /* ─── Root ────────────────────────────────────────────────────── */
 const TOAST_OPTS = {
-  style: { fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif", fontSize: '13px', background: '#1e2535', color: '#e8edf5', border: '1px solid #2a3347' },
-  success: { iconTheme: { primary: '#00d4aa', secondary: '#0d1117' } },
-  error:   { iconTheme: { primary: '#ff4757', secondary: '#0d1117' } },
+  style: { fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif", fontSize: '13px', background: '#ffffff', color: '#2c2416', border: '1px solid #ecdfc0', borderRadius: '8px', boxShadow: '0 4px 14px rgba(44,36,22,0.1)' },
+  success: { iconTheme: { primary: '#4c7a41', secondary: '#ffffff' } },
+  error:   { iconTheme: { primary: '#c1392b', secondary: '#ffffff' } },
 }
 
 export default function App() {
   const [portal, setPortal] = useState(() => localStorage.getItem('k_portal') || null)
   const [authed, setAuthed] = useState(() => !!auth.getToken())
+  const [authMode, setAuthMode] = useState('login') // 'login' | 'signup'
 
   const selectPortal = p => { localStorage.setItem('k_portal', p); setPortal(p) }
-  const switchPortal = () => { localStorage.removeItem('k_portal'); auth.clearToken(); setAuthed(false); setPortal(null) }
+  const switchPortal = () => { localStorage.removeItem('k_portal'); auth.clearToken(); setAuthed(false); setPortal(null); setAuthMode('login') }
 
   useEffect(() => {
     const onExpired = () => setAuthed(false)
@@ -352,17 +353,24 @@ export default function App() {
     </>
   )
 
+  if (!authed && authMode === 'signup') return (
+    <>
+      <Toaster position="top-right" toastOptions={TOAST_OPTS} />
+      <Signup onSuccess={() => setAuthed(true)} onBack={() => setAuthMode('login')} />
+    </>
+  )
+
   if (!authed) return (
     <>
       <Toaster position="top-right" toastOptions={TOAST_OPTS} />
-      <Login onSuccess={() => setAuthed(true)} />
+      <Login onSuccess={() => setAuthed(true)} onCreateStore={() => setAuthMode('signup')} />
     </>
   )
 
   return (
     <BrowserRouter>
       <Toaster position="top-right" toastOptions={TOAST_OPTS} />
-      <OwnerLayout onSwitch={switchPortal} />
+      <OwnerLayout onSwitch={switchPortal} role={auth.getRole()} />
     </BrowserRouter>
   )
 }

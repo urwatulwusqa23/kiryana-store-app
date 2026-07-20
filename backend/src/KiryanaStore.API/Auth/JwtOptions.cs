@@ -6,9 +6,3 @@ public class JwtOptions
     public string Issuer { get; set; } = "KiryanaStore";
     public int ExpiryMinutes { get; set; } = 480;
 }
-
-public class AdminUserOptions
-{
-    public string Username { get; set; } = "";
-    public string PasswordHash { get; set; } = "";
-}

@@ -5,7 +5,7 @@ using KiryanaStore.Domain.Interfaces;
 
 namespace KiryanaStore.Application.Services;
 
-public class ItemService(IItemRepository itemRepo) : IItemService
+public class ItemService(IItemRepository itemRepo, ICurrentUserContext currentUser) : IItemService
 {
     public async Task<IEnumerable<ItemDto>> GetAllAsync()
     {
@@ -23,6 +23,7 @@ public class ItemService(IItemRepository itemRepo) : IItemService
     {
         var entity = new Item
         {
+            StoreId = currentUser.StoreId,
             Name = dto.Name, Unit = dto.Unit, CostPrice = dto.CostPrice,
             SellingPrice = dto.SellingPrice, Quantity = dto.Quantity,
             LowStockThreshold = dto.LowStockThreshold

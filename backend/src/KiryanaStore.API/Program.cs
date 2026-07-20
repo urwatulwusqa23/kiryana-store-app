@@ -1,3 +1,4 @@
+using System.Security.Cryptography;
 using System.Text;
 using KiryanaStore.API;
 using KiryanaStore.API.Auth;
@@ -28,6 +29,9 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<ICurrentUserContext, CurrentUserContext>();
+
 var connectionString = ConnectionStringResolver.ResolveConnectionString(builder.Configuration)
     ?? "Host=localhost;Port=5432;Database=kiryanadb;Username=kiryana;Password=devlocal123";
 
@@ -50,10 +54,16 @@ builder.Services.AddScoped<IPurchaseService, PurchaseService>();
 builder.Services.AddScoped<ISaleService, SaleService>();
 
 builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection("Jwt"));
-builder.Services.Configure<AdminUserOptions>(builder.Configuration.GetSection("AdminUser"));
 
-var jwtSecret = builder.Configuration["Jwt:Secret"] ?? "";
+var jwtSecret = builder.Configuration["Jwt:Secret"];
 var jwtIssuer = builder.Configuration["Jwt:Issuer"] ?? "KiryanaStore";
+// Falls back to a random per-process key when Jwt:Secret isn't configured, so a missing
+// env var degrades to "nobody can log in" instead of crashing the whole app at startup.
+var signingKeyBytes = string.IsNullOrWhiteSpace(jwtSecret)
+    ? RandomNumberGenerator.GetBytes(32)
+    : Encoding.UTF8.GetBytes(jwtSecret);
+if (string.IsNullOrWhiteSpace(jwtSecret))
+    Console.Error.WriteLine("WARNING: Jwt:Secret is not configured. Using an ephemeral signing key — logins will not persist across restarts.");
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -65,7 +75,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateAudience = true,
             ValidAudience = jwtIssuer,
             ValidateIssuerSigningKey = true,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecret)),
+            IssuerSigningKey = new SymmetricSecurityKey(signingKeyBytes),
             ValidateLifetime = true,
             ClockSkew = TimeSpan.FromMinutes(1)
         };

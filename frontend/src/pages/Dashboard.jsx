@@ -70,16 +70,16 @@ function MiniProgress({ value, max, color, tooltip, onClick }) {
 
 /* ─── Stat card (clickable) ──────────────────────────────────── */
 const ICON_COLORS = {
-  green:  { bg: 'rgba(0,212,170,0.12)',  icon: 'var(--accent)' },
-  red:    { bg: 'rgba(255,71,87,0.12)',   icon: 'var(--red)' },
-  blue:   { bg: 'rgba(91,138,245,0.12)', icon: 'var(--blue)' },
-  yellow: { bg: 'rgba(255,214,10,0.12)', icon: 'var(--yellow)' },
-  orange: { bg: 'rgba(255,107,53,0.12)', icon: 'var(--orange)' },
-  purple: { bg: 'rgba(168,85,247,0.12)', icon: '#a855f7' },
+  green:  { icon: 'var(--forest)' },
+  red:    { icon: 'var(--accent)' },
+  blue:   { icon: 'var(--blue)' },
+  yellow: { icon: 'var(--gold)' },
+  orange: { icon: 'var(--orange)' },
+  purple: { icon: 'var(--purple)' },
 }
-const TOP_BORDER = {
-  green: 'var(--accent)', red: 'var(--red)', blue: 'var(--blue)',
-  yellow: 'var(--yellow)', orange: 'var(--orange)', purple: '#a855f7',
+const SIDE_BORDER = {
+  green: 'var(--forest)', red: 'var(--accent)', blue: 'var(--blue)',
+  yellow: 'var(--gold)', orange: 'var(--orange)', purple: 'var(--purple)',
 }
 
 function StatCard({ icon: Icon, label, value, sub, color, onClick, tooltip }) {
@@ -87,22 +87,16 @@ function StatCard({ icon: Icon, label, value, sub, color, onClick, tooltip }) {
   const card = (
     <div
       className="stat-card relative"
-      style={{ cursor: onClick ? 'pointer' : 'default' }}
-      onClick={onClick}
-      onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)' }}
-      onMouseLeave={e => { e.currentTarget.style.transform = '' }}>
-      <div className="absolute top-0 left-0 right-0 h-0.5 rounded-t-xl"
-        style={{ background: TOP_BORDER[color] || 'var(--accent)' }} />
+      style={{ cursor: onClick ? 'pointer' : 'default', borderLeft: `3px solid ${SIDE_BORDER[color] || 'var(--accent)'}` }}
+      onClick={onClick}>
       <div className="flex items-start justify-between">
         <div className="flex-1 min-w-0">
-          <p className="text-[10px] font-bold uppercase tracking-widest mb-1.5" style={{ color: 'var(--text3)' }}>{label}</p>
-          <p className="text-2xl font-extrabold leading-tight" style={{ color: 'var(--text)' }}>{value}</p>
+          <p className="kicker mb-2">{label}</p>
+          <p className="numeral text-2xl font-bold leading-tight" style={{ color: 'var(--text)' }}>{value}</p>
           {sub && <p className="text-xs mt-1" style={{ color: 'var(--text3)' }}>{sub}</p>}
         </div>
         <div className="flex flex-col items-end gap-1 flex-shrink-0">
-          <div className="p-2.5 rounded-xl" style={{ background: ic.bg }}>
-            <Icon size={18} style={{ color: ic.icon }} />
-          </div>
+          <Icon size={16} style={{ color: ic.icon }} />
           {onClick && <ChevronRight size={10} style={{ color: 'var(--text3)' }} />}
         </div>
       </div>
@@ -509,7 +503,7 @@ export default function Dashboard() {
           <StatCard icon={DollarSign} label="Month Profit"    value={fmt(data.monthProfit)}
             sub={`${monthMargin}% margin`}
             color="purple" onClick={() => setDrill({ title: 'Month Profit', subtitle: `${monthMargin}% net margin`, content: monthRevDrill.content })}
-            tooltip={[{ label: 'Month Profit', bold: true }, { label: fmt(data.monthProfit), color: '#a855f7' }, { label: `${monthMargin}% margin`, color: 'var(--text3)' }]} />
+            tooltip={[{ label: 'Month Profit', bold: true }, { label: fmt(data.monthProfit), color: 'var(--purple)' }, { label: `${monthMargin}% margin`, color: 'var(--text3)' }]} />
           <StatCard icon={Package}    label="Low Stock Items" value={data.lowStockCount}
             sub={`of ${data.totalItems} total`}
             color={data.lowStockCount > 0 ? 'red' : 'green'}

@@ -89,7 +89,7 @@ function ItemForm({ initial, initialBarcode = '', onSave, onCancel }) {
             <button type="button"
               onClick={() => setScanBarcode(true)}
               className="flex items-center gap-1 px-3 py-2 rounded-lg text-sm font-semibold flex-shrink-0"
-              style={{ background: 'rgba(0,212,170,0.1)', color: 'var(--accent)', border: '1px solid rgba(0,212,170,0.25)' }}>
+              style={{ background: 'rgba(179,69,46,0.1)', color: 'var(--accent)', border: '1px solid rgba(179,69,46,0.25)' }}>
               <ScanLine size={14} /> Scan
             </button>
           </div>
@@ -110,9 +110,9 @@ function ItemForm({ initial, initialBarcode = '', onSave, onCancel }) {
       {margin !== null && (
         <div className="px-3 py-2 rounded-lg text-xs font-semibold"
           style={{
-            background: margin >= 20 ? 'rgba(0,212,170,0.1)' : margin >= 10 ? 'rgba(255,214,10,0.1)' : 'rgba(255,71,87,0.1)',
+            background: margin >= 20 ? 'rgba(179,69,46,0.1)' : margin >= 10 ? 'rgba(201,154,63,0.1)' : 'rgba(179,69,46,0.1)',
             color: margin >= 20 ? 'var(--accent)' : margin >= 10 ? 'var(--yellow)' : 'var(--red)',
-            border: `1px solid ${margin >= 20 ? 'rgba(0,212,170,0.2)' : margin >= 10 ? 'rgba(255,214,10,0.2)' : 'rgba(255,71,87,0.2)'}`,
+            border: `1px solid ${margin >= 20 ? 'rgba(179,69,46,0.2)' : margin >= 10 ? 'rgba(201,154,63,0.2)' : 'rgba(179,69,46,0.2)'}`,
           }}>
           Margin: {margin}% · Profit per unit: Rs. {(Number(form.sellingPrice) - Number(form.costPrice)).toFixed(2)}
         </div>
@@ -309,7 +309,7 @@ function ReceiveStockModal({ items, suppliers, onClose }) {
                         <input className="input text-sm" type="number" min="0" step="0.01"
                           value={line.unitCost} onChange={e => setLine(i, 'unitCost', e.target.value)}
                           placeholder="Unit cost"
-                          style={{ borderColor: costUp ? 'rgba(255,107,53,0.6)' : undefined }} />
+                          style={{ borderColor: costUp ? 'rgba(179,69,46,0.6)' : undefined }} />
                       </div>
                       <div className="flex items-center justify-between">
                         <span className="text-xs font-semibold" style={{ color: 'var(--text2)' }}>
@@ -385,7 +385,7 @@ function SupplierHistoryView({ purchases, suppliers }) {
               onClick={() => toggle(sup.id)}>
               <div className="flex items-center gap-3 min-w-0">
                 <div className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0"
-                  style={{ background: 'rgba(91,138,245,0.15)', color: 'var(--blue)' }}>
+                  style={{ background: 'rgba(92,122,138,0.15)', color: 'var(--blue)' }}>
                   {sup.name.charAt(0)}
                 </div>
                 <div className="min-w-0">
@@ -427,7 +427,7 @@ function SupplierHistoryView({ purchases, suppliers }) {
                         )}
                       </div>
                       <span className="text-xs font-bold px-2 py-0.5 rounded-md"
-                        style={{ background: 'rgba(0,212,170,0.1)', color: 'var(--accent)' }}>
+                        style={{ background: 'rgba(179,69,46,0.1)', color: 'var(--accent)' }}>
                         Rs {p.totalCost.toLocaleString()}
                       </span>
                     </div>
@@ -527,7 +527,7 @@ function ItemHistoryView({ purchases, items }) {
               onClick={() => toggle(item.id)}>
               <div className="flex items-center gap-3 min-w-0">
                 <div className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0"
-                  style={{ background: 'rgba(0,212,170,0.1)', color: 'var(--accent)' }}>
+                  style={{ background: 'rgba(179,69,46,0.1)', color: 'var(--accent)' }}>
                   {item.name.charAt(0)}
                 </div>
                 <div className="min-w-0">
@@ -653,7 +653,7 @@ function StockHistoryModal({ items, suppliers, onClose }) {
             <button key={t.key} onClick={() => setView(t.key)}
               className="px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all"
               style={{
-                background: view === t.key ? 'rgba(0,212,170,0.15)' : 'var(--surface2)',
+                background: view === t.key ? 'rgba(179,69,46,0.15)' : 'var(--surface2)',
                 color:      view === t.key ? 'var(--accent)' : 'var(--text3)',
                 border:     `1px solid ${view === t.key ? 'var(--accent)' : 'var(--border)'}`,
               }}>
@@ -799,7 +799,7 @@ function BulkUploadModal({ onClose, onDone }) {
             </p>
             <button onClick={downloadTemplate}
               className="flex items-center gap-2 text-xs font-semibold px-3 py-2 rounded-lg"
-              style={{ background: 'rgba(0,212,170,0.1)', color: 'var(--accent)', border: '1px solid rgba(0,212,170,0.2)' }}>
+              style={{ background: 'rgba(179,69,46,0.1)', color: 'var(--accent)', border: '1px solid rgba(179,69,46,0.2)' }}>
               <Download size={13} /> Download inventory_template.csv
             </button>
           </div>
@@ -828,7 +828,7 @@ function BulkUploadModal({ onClose, onDone }) {
             </label>
             {parseError && (
               <div className="mt-3 flex items-start gap-2 p-3 rounded-lg"
-                style={{ background: 'rgba(255,71,87,0.08)', border: '1px solid rgba(255,71,87,0.2)' }}>
+                style={{ background: 'rgba(179,69,46,0.08)', border: '1px solid rgba(179,69,46,0.2)' }}>
                 <AlertCircle size={13} style={{ color: 'var(--red)', flexShrink: 0, marginTop: 1 }} />
                 <p className="text-xs" style={{ color: 'var(--red)' }}>{parseError}</p>
               </div>
@@ -871,7 +871,7 @@ function BulkUploadModal({ onClose, onDone }) {
                       {rows.map((row, i) => {
                         const ok = row.errors.length === 0
                         return (
-                          <tr key={i} style={{ borderTop: '1px solid var(--border)', background: ok ? '' : 'rgba(255,71,87,0.04)' }}>
+                          <tr key={i} style={{ borderTop: '1px solid var(--border)', background: ok ? '' : 'rgba(179,69,46,0.04)' }}>
                             <td style={{ padding: '6px 10px', color: 'var(--text3)' }}>{row._line}</td>
                             <td style={{ padding: '6px 10px', color: 'var(--text)', fontWeight: 500 }}>{row.name || '—'}</td>
                             <td style={{ padding: '6px 10px', color: 'var(--text2)' }}>{row.unit}</td>
@@ -907,7 +907,7 @@ function BulkUploadModal({ onClose, onDone }) {
               <div className="space-y-1.5">
                 {results.map((r, i) => (
                   <div key={i} className="flex items-center justify-between px-3 py-2 rounded-lg"
-                    style={{ background: r.ok ? 'rgba(0,212,170,0.06)' : 'rgba(255,71,87,0.06)', border: `1px solid ${r.ok ? 'rgba(0,212,170,0.15)' : 'rgba(255,71,87,0.15)'}` }}>
+                    style={{ background: r.ok ? 'rgba(179,69,46,0.06)' : 'rgba(179,69,46,0.06)', border: `1px solid ${r.ok ? 'rgba(179,69,46,0.15)' : 'rgba(179,69,46,0.15)'}` }}>
                     <span className="text-xs font-medium" style={{ color: 'var(--text)' }}>{r.name}</span>
                     {r.ok
                       ? <CheckCircle size={13} style={{ color: 'var(--accent)' }} />
@@ -1076,7 +1076,7 @@ export default function Inventory() {
             { label: 'Total SKUs',   val: items.length,                          sub: null,              color: 'var(--blue)' },
             { label: 'Low Stock',    val: lowCount,                              sub: `${outCount} out`, color: 'var(--yellow)' },
             { label: 'Stock (Cost)', val: `Rs. ${costValue.toLocaleString()}`,   sub: null,              color: 'var(--accent)' },
-            { label: 'Stock (Sell)', val: `Rs. ${sellValue.toLocaleString()}`,   sub: null,              color: '#a855f7' },
+            { label: 'Stock (Sell)', val: `Rs. ${sellValue.toLocaleString()}`,   sub: null,              color: 'var(--purple)' },
           ].map(({ label, val, sub, color }) => (
             <div key={label} className="stat-card">
               <div className="absolute top-0 left-0 right-0 h-0.5 rounded-t-xl" style={{ background: color }} />
@@ -1176,14 +1176,14 @@ export default function Inventory() {
                     const isHighlighted = highlightId === item.id
                     return (
                       <tr key={item.id} id={`inv-row-${item.id}`}
-                        style={isHighlighted ? { background: 'rgba(0,212,170,0.12)', outline: '2px solid var(--accent)', transition: 'all 0.3s' } : undefined}>
+                        style={isHighlighted ? { background: 'rgba(179,69,46,0.12)', outline: '2px solid var(--accent)', transition: 'all 0.3s' } : undefined}>
                         <td>
                           <div className="flex items-center gap-2">
                             {item.isLowStock && <AlertTriangle size={13} style={{ color: 'var(--orange)', flexShrink: 0 }} />}
                             <span className="font-semibold" style={{ color: 'var(--text)' }}>{item.name}</span>
                             {reverseFind(item.id) && (
                               <span className="text-[9px] font-bold px-1.5 py-0.5 rounded" title={`Barcode: ${reverseFind(item.id)}`}
-                                style={{ background: 'rgba(0,212,170,0.1)', color: 'var(--accent)', border: '1px solid rgba(0,212,170,0.2)' }}>
+                                style={{ background: 'rgba(179,69,46,0.1)', color: 'var(--accent)', border: '1px solid rgba(179,69,46,0.2)' }}>
                                 📷
                               </span>
                             )}
@@ -1216,7 +1216,7 @@ export default function Inventory() {
                                 title="Reorder via WhatsApp"
                                 className="p-1.5 rounded-lg transition-colors"
                                 style={{ color: 'var(--orange)' }}
-                                onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,107,53,0.1)' }}
+                                onMouseEnter={e => { e.currentTarget.style.background = 'rgba(179,69,46,0.1)' }}
                                 onMouseLeave={e => { e.currentTarget.style.background = '' }}>
                                 <RefreshCw size={13} />
                               </button>
@@ -1242,7 +1242,7 @@ export default function Inventory() {
                             <button onClick={() => handleDelete(item.id)}
                               className="p-1.5 rounded-lg transition-colors"
                               style={{ color: 'var(--text3)' }}
-                              onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,71,87,0.1)'; e.currentTarget.style.color = 'var(--red)' }}
+                              onMouseEnter={e => { e.currentTarget.style.background = 'rgba(179,69,46,0.1)'; e.currentTarget.style.color = 'var(--red)' }}
                               onMouseLeave={e => { e.currentTarget.style.background = ''; e.currentTarget.style.color = 'var(--text3)' }}>
                               <Trash2 size={13} />
                             </button>

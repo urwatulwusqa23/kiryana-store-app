@@ -3,6 +3,7 @@ namespace KiryanaStore.Domain.Entities;
 public class Item
 {
     public int Id { get; set; }
+    public int StoreId { get; set; }
     public string Name { get; set; } = string.Empty;
     public string Unit { get; set; } = "pcs";
     public decimal CostPrice { get; set; }
