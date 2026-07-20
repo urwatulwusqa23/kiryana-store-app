@@ -3,11 +3,20 @@ import {
   ShoppingBag, ShoppingCart, Plus, Minus,
   ArrowLeft, Search, Package, MapPin, MessageCircle, X, ChevronRight,
 } from 'lucide-react'
-import { itemApi, saleApi } from '../services/api'
+import { itemApi } from '../services/api'
 import {
-  initOrder, addMyOrder, getMyOrders, getOrder, STEPS,
+  placeOrder, getMyOrders, STEPS,
 } from '../store/orderStore'
 import toast from 'react-hot-toast'
+
+const STATUS_KEY = { Pending: 'pending', Confirmed: 'confirmed', PickedUp: 'picked_up', OnTheWay: 'on_the_way', Delivered: 'delivered' }
+function toOrderState(sale) {
+  return {
+    status: STATUS_KEY[sale.orderStatus] || 'pending',
+    riderName: sale.riderName,
+    confirmedAt: sale.confirmedAt, pickedAt: sale.pickedUpAt, onWayAt: sale.onTheWayAt, deliveredAt: sale.deliveredAt,
+  }
+}
 
 const ORANGE = 'var(--accent)'
 const STORE  = { name: 'Ahmed General Store', area: 'Gulberg III, Lahore', phone: '03XX-1234567' }
@@ -128,12 +137,11 @@ function BrowseStore({ onOrderPlaced }) {
     setSubmitting(true)
     try {
       const name = customerName.trim() || 'Online Customer'
-      const sale = await saleApi.create({
+      const sale = await placeOrder({
         customerName: name,
+        address: address.trim(),
         items: cartItems.map(({ item, qty }) => ({ itemId: item.id, quantity: qty })),
       })
-      initOrder(sale.id, { address: address.trim(), customerName: name })
-      addMyOrder(sale, address.trim())
       setCart({}); setView('shop')
       toast.success('Order placed! Waiting for store confirmation.')
       onOrderPlaced?.(sale.id)
@@ -358,16 +366,9 @@ function BrowseStore({ onOrderPlaced }) {
 /* ─── My Orders ──────────────────────────────────────────────── */
 function MyOrders({ onTrack }) {
   const [orders,  setOrders]  = useState([])
-  const [states,  setStates]  = useState({})
 
-  function refresh() {
-    setOrders(getMyOrders())
-    const d = {}
-    getMyOrders().forEach(o => {
-      const st = getOrder(o.sale.id)
-      if (st) d[o.sale.id] = st
-    })
-    setStates(d)
+  async function refresh() {
+    try { setOrders(await getMyOrders()) } catch { /* ignore */ }
   }
 
   useEffect(() => {
@@ -394,9 +395,10 @@ function MyOrders({ onTrack }) {
         {orders.length} order{orders.length !== 1 ? 's' : ''}
       </p>
 
-      {orders.map(({ sale, address }) => {
-        const st     = states[sale.id]
-        const status = st?.status || 'pending'
+      {orders.map(sale => {
+        const st     = toOrderState(sale)
+        const status = st.status
+        const address = sale.deliveryAddress
         const sm     = STATUS_META[status] || STATUS_META.pending
 
         return (
@@ -455,18 +457,16 @@ function MyOrders({ onTrack }) {
 
 /* ─── Track Order ────────────────────────────────────────────── */
 function TrackOrder({ saleId }) {
-  const [orderState, setOrderState] = useState(null)
-  const [saleData,   setSaleData]   = useState(null)
+  const [sale, setSale] = useState(null)
 
   useEffect(() => {
     if (!saleId) return
 
-    // Find sale data from k_my_orders
-    const mine = getMyOrders().find(o => o.sale.id === saleId)
-    if (mine) setSaleData(mine)
-
-    function refresh() {
-      setOrderState(getOrder(saleId))
+    async function refresh() {
+      try {
+        const mine = await getMyOrders()
+        setSale(mine.find(o => o.id === saleId) || null)
+      } catch { /* ignore */ }
     }
     refresh()
     const iv = setInterval(refresh, 3000)
@@ -475,7 +475,7 @@ function TrackOrder({ saleId }) {
     return () => { clearInterval(iv); window.removeEventListener('orderStateChanged', h) }
   }, [saleId])
 
-  if (!saleId || !saleData) return (
+  if (!saleId || !sale) return (
     <div className="text-center py-16 px-4">
       <MapPin size={40} className="mx-auto mb-4 opacity-20" style={{ color: 'var(--text3)' }} />
       <p className="font-bold" style={{ color: 'var(--text2)' }}>No order selected</p>
@@ -485,8 +485,9 @@ function TrackOrder({ saleId }) {
     </div>
   )
 
-  const { sale, address } = saleData
-  const status = orderState?.status || 'pending'
+  const address = sale.deliveryAddress
+  const orderState = toOrderState(sale)
+  const status = orderState.status
   const currentIdx = STEPS.findIndex(s => s.key === status)
   const sm = STATUS_META[status] || STATUS_META.pending
 

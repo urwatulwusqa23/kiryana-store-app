@@ -90,3 +90,19 @@ export const saleApi = {
   getDashboard: () => api.get('/sales/dashboard').then(r => r.data),
   create: data => api.post('/sales', data).then(r => r.data)
 }
+
+export const orderApi = {
+  getAll: () => api.get('/orders').then(r => r.data),
+  getRiders: () => api.get('/orders/riders').then(r => r.data),
+  place: data => api.post('/orders', data).then(r => r.data),
+  getMine: customerRef => api.get('/orders/mine', { params: { customerRef } }).then(r => r.data),
+  confirm: (id, riderId) => api.put(`/orders/${id}/confirm`, { riderId }).then(r => r.data),
+  advance: id => api.put(`/orders/${id}/advance`).then(r => r.data),
+}
+
+export const expenseApi = {
+  getAll: (from, to) => api.get('/expenses', { params: { from, to } }).then(r => r.data),
+  create: data => api.post('/expenses', data).then(r => r.data),
+  update: (id, data) => api.put(`/expenses/${id}`, data).then(r => r.data),
+  delete: id => api.delete(`/expenses/${id}`)
+}

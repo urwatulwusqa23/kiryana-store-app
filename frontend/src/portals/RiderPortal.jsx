@@ -1,8 +1,16 @@
 import { useEffect, useState } from 'react'
 import { CheckCircle, Clock, ChevronRight, MapPin, Package } from 'lucide-react'
-import { saleApi } from '../services/api'
-import { getAllOrders, advanceOrder, STEPS } from '../store/orderStore'
+import { fetchOrders, advanceOrder, STEPS } from '../store/orderStore'
 import toast from 'react-hot-toast'
+
+const STATUS_KEY = { Pending: 'pending', Confirmed: 'confirmed', PickedUp: 'picked_up', OnTheWay: 'on_the_way', Delivered: 'delivered' }
+function toOrderState(sale) {
+  return {
+    status: STATUS_KEY[sale.orderStatus] || 'pending',
+    riderName: sale.riderName, address: sale.deliveryAddress || '',
+    confirmedAt: sale.confirmedAt, pickedAt: sale.pickedUpAt, onWayAt: sale.onTheWayAt, deliveredAt: sale.deliveredAt,
+  }
+}
 
 const YELLOW = 'var(--gold)'
 const RIDER  = { name: 'Asif Khan', area: 'Gulberg III, Lahore' }
@@ -23,43 +31,34 @@ const NEXT_BTN = {
 /* ─── Shell ──────────────────────────────────────────────────── */
 export default function RiderPortal({ onSwitch }) {
   const [sales,   setSales]   = useState([])
-  const [states,  setStates]  = useState({})
   const [loading, setLoading] = useState(true)
   const [tab,     setTab]     = useState('active')
 
   async function loadSales() {
-    try { setSales(await saleApi.getAll()) }
+    try { setSales(await fetchOrders()) }
     catch (e) { toast.error(e.message) }
     finally { setLoading(false) }
   }
 
-  function refreshStates() { setStates({ ...getAllOrders() }) }
-
   useEffect(() => {
     loadSales()
-    refreshStates()
-    const h = () => refreshStates()
+    const h = () => loadSales()
     window.addEventListener('orderStateChanged', h)
-    const iv = setInterval(refreshStates, 5000)
+    const iv = setInterval(loadSales, 5000)
     return () => { window.removeEventListener('orderStateChanged', h); clearInterval(iv) }
   }, [])
 
-  function handleAdvance(saleId) {
-    const order = states[String(saleId)]
+  async function handleAdvance(saleId) {
+    const order = sales.find(s => s.id === saleId)
     if (!order) return
-    advanceOrder(saleId)
-    refreshStates()
-    if (order.status === 'on_the_way') {
-      toast.success('🏠 Delivery marked complete!')
-    } else {
-      toast.success('Status updated!')
-    }
+    const wasOnTheWay = STATUS_KEY[order.orderStatus] === 'on_the_way'
+    try {
+      await advanceOrder(saleId)
+      toast.success(wasOnTheWay ? '🏠 Delivery marked complete!' : 'Status updated!')
+    } catch (e) { toast.error(e.message) }
   }
 
-  // Only orders tracked in the order store (placed via customer portal)
-  const enriched = sales
-    .map(s => ({ ...s, orderState: states[String(s.id)] || null }))
-    .filter(s => s.orderState !== null)
+  const enriched = sales.map(s => ({ ...s, orderState: toOrderState(s) }))
 
   const active    = enriched.filter(s =>
     ['confirmed', 'picked_up', 'on_the_way'].includes(s.orderState.status))

@@ -45,6 +45,7 @@ builder.Services.AddScoped<IPurchaseRepository, PurchaseRepository>();
 builder.Services.AddScoped<ISaleRepository, SaleRepository>();
 builder.Services.AddScoped<IRepository<Supplier>, GenericRepository<Supplier>>();
 builder.Services.AddScoped<IRepository<CreditTransaction>, GenericRepository<CreditTransaction>>();
+builder.Services.AddScoped<IRepository<Expense>, GenericRepository<Expense>>();
 
 // Services
 builder.Services.AddScoped<ICustomerService, CustomerService>();
@@ -52,6 +53,7 @@ builder.Services.AddScoped<IItemService, ItemService>();
 builder.Services.AddScoped<ISupplierService, SupplierService>();
 builder.Services.AddScoped<IPurchaseService, PurchaseService>();
 builder.Services.AddScoped<ISaleService, SaleService>();
+builder.Services.AddScoped<IExpenseService, ExpenseService>();
 
 builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection("Jwt"));
 

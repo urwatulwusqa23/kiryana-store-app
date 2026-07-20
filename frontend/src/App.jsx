@@ -21,7 +21,7 @@ import RiderPortal    from './portals/RiderPortal'
 import Login          from './pages/Login'
 import Signup         from './pages/Signup'
 import GroceryBackdrop from './components/GroceryBackdrop'
-import { getPendingCount } from './store/orderStore'
+import { getPendingCount, fetchOrders } from './store/orderStore'
 import { auth } from './services/api'
 
 /* ─── Portal definitions ─────────────────────────────────────── */
@@ -169,7 +169,7 @@ function Sidebar({ open, onClose, onSwitch, role }) {
   const [pendingCount, setPendingCount] = useState(0)
 
   useEffect(() => {
-    const check = () => setPendingCount(getPendingCount())
+    const check = async () => { try { await fetchOrders() } catch { /* ignore */ } setPendingCount(getPendingCount()) }
     check()
     window.addEventListener('orderStateChanged', check)
     const iv = setInterval(check, 5000)

@@ -1,9 +1,6 @@
 import { useEffect, useState } from 'react'
-import { ShoppingBag, AlertCircle, Clock, CheckCircle } from 'lucide-react'
-import { saleApi } from '../services/api'
-import {
-  getAllOrders, confirmOrder as doConfirm, RIDERS,
-} from '../store/orderStore'
+import { ShoppingBag, AlertCircle } from 'lucide-react'
+import { fetchOrders, confirmOrder as doConfirm, getRiders } from '../store/orderStore'
 import toast from 'react-hot-toast'
 
 const ORANGE = 'var(--accent)'
@@ -16,10 +13,12 @@ const STATUS_META = {
   delivered:  { bg: 'rgba(179,69,46,0.1)',   color: 'var(--accent)', label: '✓ Delivered'   },
 }
 
+const STATUS_KEY = { Pending: 'pending', Confirmed: 'confirmed', PickedUp: 'picked_up', OnTheWay: 'on_the_way', Delivered: 'delivered' }
+
 /* ─── Single order card ───────────────────────────────────────── */
-function OrderCard({ sale, orderState, onConfirm }) {
+function OrderCard({ sale, riders, onConfirm }) {
   const [riderId, setRiderId] = useState('')
-  const status = orderState.status
+  const status = STATUS_KEY[sale.orderStatus] || 'pending'
   const st = STATUS_META[status] || STATUS_META.pending
 
   return (
@@ -40,7 +39,7 @@ function OrderCard({ sale, orderState, onConfirm }) {
           </div>
           <p className="text-xs mt-0.5 truncate" style={{ color: 'var(--text3)' }}>
             {sale.customerName}
-            {orderState.address && <> · 📍 {orderState.address}</>}
+            {sale.deliveryAddress && <> · 📍 {sale.deliveryAddress}</>}
           </p>
           <p className="text-xs" style={{ color: 'var(--text3)' }}>
             {new Date(sale.saleDate).toLocaleDateString('en-PK', {
@@ -65,13 +64,13 @@ function OrderCard({ sale, orderState, onConfirm }) {
       </div>
 
       {/* Assigned rider info */}
-      {orderState.riderName && status !== 'pending' && (
+      {sale.riderName && status !== 'pending' && (
         <p className="text-xs" style={{ color: 'var(--text3)' }}>
           🛵 Assigned to{' '}
-          <strong style={{ color: 'var(--text2)' }}>{orderState.riderName}</strong>
-          {orderState.confirmedAt && (
+          <strong style={{ color: 'var(--text2)' }}>{sale.riderName}</strong>
+          {sale.confirmedAt && (
             <> · confirmed{' '}
-              {new Date(orderState.confirmedAt).toLocaleTimeString('en-PK', {
+              {new Date(sale.confirmedAt).toLocaleTimeString('en-PK', {
                 hour: '2-digit', minute: '2-digit',
               })}
             </>
@@ -80,10 +79,10 @@ function OrderCard({ sale, orderState, onConfirm }) {
       )}
 
       {/* Delivery timestamps */}
-      {status === 'delivered' && orderState.deliveredAt && (
+      {status === 'delivered' && sale.deliveredAt && (
         <p className="text-xs" style={{ color: 'var(--accent)' }}>
           ✓ Delivered at{' '}
-          {new Date(orderState.deliveredAt).toLocaleTimeString('en-PK', {
+          {new Date(sale.deliveredAt).toLocaleTimeString('en-PK', {
             hour: '2-digit', minute: '2-digit',
           })}
         </p>
@@ -97,9 +96,9 @@ function OrderCard({ sale, orderState, onConfirm }) {
             value={riderId}
             onChange={e => setRiderId(e.target.value)}>
             <option value="">— Select rider —</option>
-            {RIDERS.map(r => (
+            {riders.map(r => (
               <option key={r.id} value={r.id}>
-                {r.name} · {r.area}
+                {r.fullName}
               </option>
             ))}
           </select>
@@ -117,15 +116,13 @@ function OrderCard({ sale, orderState, onConfirm }) {
 /* ─── Main Orders page ────────────────────────────────────────── */
 export default function Orders() {
   const [sales,   setSales]   = useState([])
-  const [states,  setStates]  = useState({})
+  const [riders,  setRiders]  = useState([])
   const [loading, setLoading] = useState(true)
   const [filter,  setFilter]  = useState('pending')
 
-  function refreshStates() { setStates({ ...getAllOrders() }) }
-
   async function load() {
     try {
-      const data = await saleApi.getAll()
+      const data = await fetchOrders()
       setSales([...data].sort((a, b) => new Date(b.saleDate) - new Date(a.saleDate)))
     } catch (e) { toast.error(e.message) }
     finally { setLoading(false) }
@@ -133,44 +130,40 @@ export default function Orders() {
 
   useEffect(() => {
     load()
-    refreshStates()
-    const h = () => refreshStates()
+    getRiders().then(setRiders).catch(() => {})
+    const h = () => load()
     window.addEventListener('orderStateChanged', h)
-    const iv = setInterval(refreshStates, 4000)
+    const iv = setInterval(load, 5000)
     return () => { window.removeEventListener('orderStateChanged', h); clearInterval(iv) }
   }, [])
 
-  function handleConfirm(saleId, riderId) {
+  async function handleConfirm(saleId, riderId) {
     if (!riderId) return toast.error('Select a rider first')
-    doConfirm(saleId, riderId)
-    refreshStates()
-    toast.success('Order confirmed and rider assigned!')
+    try {
+      await doConfirm(saleId, riderId)
+      toast.success('Order confirmed and rider assigned!')
+    } catch (e) { toast.error(e.message) }
   }
 
-  // Only show sales that have a state (placed via Customer Portal)
-  const enriched = sales
-    .map(s => ({ ...s, orderState: states[String(s.id)] || null }))
-    .filter(s => s.orderState !== null)
-
-  const pendingCount   = enriched.filter(s => s.orderState.status === 'pending').length
-  const activeCount    = enriched.filter(s =>
-    ['confirmed', 'picked_up', 'on_the_way'].includes(s.orderState.status)).length
-  const deliveredCount = enriched.filter(s => s.orderState.status === 'delivered').length
+  const statusOf = s => STATUS_KEY[s.orderStatus] || 'pending'
+  const pendingCount   = sales.filter(s => statusOf(s) === 'pending').length
+  const activeCount    = sales.filter(s => ['confirmed', 'picked_up', 'on_the_way'].includes(statusOf(s))).length
+  const deliveredCount = sales.filter(s => statusOf(s) === 'delivered').length
 
   const FILTERS = [
     { key: 'pending',   label: '⏳ Pending',    count: pendingCount   },
     { key: 'active',    label: '🛵 In Transit', count: activeCount    },
     { key: 'delivered', label: '✓ Delivered',   count: deliveredCount },
-    { key: 'all',       label: 'All',           count: enriched.length },
+    { key: 'all',       label: 'All',           count: sales.length },
   ]
 
   const displayed = filter === 'pending'
-    ? enriched.filter(s => s.orderState.status === 'pending')
+    ? sales.filter(s => statusOf(s) === 'pending')
     : filter === 'active'
-      ? enriched.filter(s => ['confirmed', 'picked_up', 'on_the_way'].includes(s.orderState.status))
+      ? sales.filter(s => ['confirmed', 'picked_up', 'on_the_way'].includes(statusOf(s)))
       : filter === 'delivered'
-        ? enriched.filter(s => s.orderState.status === 'delivered')
-        : enriched
+        ? sales.filter(s => statusOf(s) === 'delivered')
+        : sales
 
   if (loading) return (
     <div className="flex items-center justify-center h-64">
@@ -207,7 +200,7 @@ export default function Orders() {
           { label: 'New Orders',  val: pendingCount,    color: 'var(--red)'    },
           { label: 'In Transit',  val: activeCount,     color: 'var(--yellow)' },
           { label: 'Delivered',   val: deliveredCount,  color: 'var(--accent)' },
-          { label: 'Total',       val: enriched.length, color: 'var(--blue)'   },
+          { label: 'Total',       val: sales.length,    color: 'var(--blue)'   },
         ].map(({ label, val, color }) => (
           <div key={label} className="stat-card">
             <div className="absolute top-0 left-0 right-0 h-0.5 rounded-t-xl"
@@ -254,7 +247,7 @@ export default function Orders() {
             <OrderCard
               key={sale.id}
               sale={sale}
-              orderState={sale.orderState}
+              riders={riders}
               onConfirm={handleConfirm}
             />
           ))}

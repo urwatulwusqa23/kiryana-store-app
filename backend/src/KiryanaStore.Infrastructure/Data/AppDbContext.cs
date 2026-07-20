@@ -17,6 +17,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options, ICurrentUserCo
     public DbSet<PurchaseItem> PurchaseItems => Set<PurchaseItem>();
     public DbSet<Sale> Sales => Set<Sale>();
     public DbSet<SaleItem> SaleItems => Set<SaleItem>();
+    public DbSet<Expense> Expenses => Set<Expense>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -31,9 +32,14 @@ public class AppDbContext(DbContextOptions<AppDbContext> options, ICurrentUserCo
         modelBuilder.Entity<CreditTransaction>().HasQueryFilter(t => t.StoreId == currentUser.StoreId);
         modelBuilder.Entity<User>().HasQueryFilter(u => u.StoreId == currentUser.StoreId);
         modelBuilder.Entity<CustomerAccount>().HasQueryFilter(c => c.StoreId == currentUser.StoreId);
+        modelBuilder.Entity<Expense>().HasQueryFilter(e => e.StoreId == currentUser.StoreId);
 
         modelBuilder.Entity<CreditTransaction>()
             .Property(t => t.Type)
+            .HasConversion<string>();
+
+        modelBuilder.Entity<Sale>()
+            .Property(s => s.OrderStatus)
             .HasConversion<string>();
 
         modelBuilder.Entity<Sale>()
@@ -58,5 +64,6 @@ public class AppDbContext(DbContextOptions<AppDbContext> options, ICurrentUserCo
         modelBuilder.Entity<Sale>().Property(s => s.TotalCost).HasPrecision(18, 2);
         modelBuilder.Entity<SaleItem>().Property(s => s.UnitPrice).HasPrecision(18, 2);
         modelBuilder.Entity<SaleItem>().Property(s => s.UnitCost).HasPrecision(18, 2);
+        modelBuilder.Entity<Expense>().Property(e => e.Amount).HasPrecision(18, 2);
     }
 }

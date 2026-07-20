@@ -1,8 +1,4 @@
-export const RIDERS = [
-  { id: 'asif',   name: 'Asif Khan',   area: 'Model Town'  },
-  { id: 'bilal',  name: 'Bilal Ahmed', area: 'Johar Town'  },
-  { id: 'kamran', name: 'Kamran Ali',  area: 'DHA Phase 5' },
-]
+import { orderApi } from '../services/api'
 
 export const STEPS = [
   { key: 'pending',    icon: '📋', label: 'Order Placed',   desc: 'Waiting for store to confirm'      },
@@ -12,79 +8,91 @@ export const STEPS = [
   { key: 'delivered',  icon: '🏠', label: 'Delivered',      desc: 'Order delivered successfully!'      },
 ]
 
-const LS_STATE  = 'k_order_state'
-const LS_MINE   = 'k_my_orders'
+const STATUS_MAP = { Pending: 'pending', Confirmed: 'confirmed', PickedUp: 'picked_up', OnTheWay: 'on_the_way', Delivered: 'delivered' }
+const CUSTOMER_REF_KEY = 'k_customer_ref'
 
-function loadAll()  { try { return JSON.parse(localStorage.getItem(LS_STATE) || '{}') } catch { return {} } }
-function saveAll(d) { localStorage.setItem(LS_STATE, JSON.stringify(d)) }
-function emit()     { window.dispatchEvent(new Event('orderStateChanged')) }
+function emit() { window.dispatchEvent(new Event('orderStateChanged')) }
+
+function toOrderState(sale) {
+  return {
+    status:       STATUS_MAP[sale.orderStatus] || 'pending',
+    riderId:      sale.riderId,
+    riderName:    sale.riderName,
+    address:      sale.deliveryAddress || '',
+    customerName: sale.customerName || '',
+    placedAt:     sale.saleDate,
+    confirmedAt:  sale.confirmedAt,
+    pickedAt:     sale.pickedUpAt,
+    onWayAt:      sale.onTheWayAt,
+    deliveredAt:  sale.deliveredAt,
+  }
+}
+
+// In-memory cache of the last fetched order list, so sync-style getOrder/getAllOrders
+// keep working for components that read them outside an async flow.
+let cache = []
+
+export async function fetchOrders() {
+  cache = await orderApi.getAll()
+  return cache
+}
 
 export function getOrder(id) {
-  return loadAll()[String(id)] || null
+  const sale = cache.find(s => s.id === Number(id))
+  return sale ? toOrderState(sale) : null
 }
 
 export function getAllOrders() {
-  return loadAll()
-}
-
-export function initOrder(saleId, meta = {}) {
-  const d = loadAll()
-  d[String(saleId)] = {
-    status:      'pending',
-    riderId:     null,
-    riderName:   null,
-    address:     meta.address     || '',
-    customerName: meta.customerName || '',
-    placedAt:    new Date().toISOString(),
-    confirmedAt: null,
-    pickedAt:    null,
-    onWayAt:     null,
-    deliveredAt: null,
-  }
-  saveAll(d); emit()
-}
-
-export function confirmOrder(saleId, riderId) {
-  const d = loadAll()
-  const key = String(saleId)
-  if (!d[key]) return
-  const rider = RIDERS.find(r => r.id === riderId)
-  d[key] = {
-    ...d[key],
-    status:      'confirmed',
-    riderId,
-    riderName:   rider?.name || riderId,
-    confirmedAt: new Date().toISOString(),
-  }
-  saveAll(d); emit()
-}
-
-export function advanceOrder(saleId) {
-  const d = loadAll()
-  const key = String(saleId)
-  const order = d[key]
-  if (!order) return
-  const NEXT = { confirmed: 'picked_up', picked_up: 'on_the_way', on_the_way: 'delivered' }
-  const TIME = { picked_up: 'pickedAt', on_the_way: 'onWayAt', delivered: 'deliveredAt' }
-  const next = NEXT[order.status]
-  if (!next) return
-  d[key] = { ...order, status: next, [TIME[next]]: new Date().toISOString() }
-  saveAll(d); emit()
+  const map = {}
+  cache.forEach(s => { map[String(s.id)] = toOrderState(s) })
+  return map
 }
 
 export function getPendingCount() {
-  return Object.values(loadAll()).filter(o => o.status === 'pending').length
+  return cache.filter(s => s.orderStatus === 'Pending').length
 }
 
-/* ── Customer-side "my orders" list ─────────────────────────── */
-export function getMyOrders() {
-  try { return JSON.parse(localStorage.getItem(LS_MINE) || '[]') } catch { return [] }
+export function getSales() {
+  return cache
 }
 
-export function addMyOrder(sale, address) {
-  const arr = getMyOrders()
-  // avoid duplicates
-  if (arr.some(o => o.sale.id === sale.id)) return
-  arr.unshift({ sale, address, placedAt: new Date().toISOString() })
-  localStorage.setItem(LS_MINE, JSON.stringify(arr.slice(0, 30)))
+export async function confirmOrder(saleId, riderId) {
+  await orderApi.confirm(saleId, riderId)
+  await fetchOrders()
+  emit()
+}
+
+export async function advanceOrder(saleId) {
+  await orderApi.advance(saleId)
+  await fetchOrders()
+  emit()
+}
+
+export async function getRiders() {
+  return orderApi.getRiders()
+}
+
+/* ── Customer-side ("my orders") ──────────────────────────────── */
+export function getCustomerRef() {
+  let ref = localStorage.getItem(CUSTOMER_REF_KEY)
+  if (!ref) {
+    ref = 'c_' + Date.now().toString(36) + Math.random().toString(36).slice(2)
+    localStorage.setItem(CUSTOMER_REF_KEY, ref)
+  }
+  return ref
+}
+
+export async function placeOrder({ customerName, address, items }) {
+  const sale = await orderApi.place({
+    customerName,
+    deliveryAddress: address,
+    customerRef: getCustomerRef(),
+    items,
+  })
+  emit()
+  return sale
+}
+
+export async function getMyOrders() {
+  return orderApi.getMine(getCustomerRef())
 }

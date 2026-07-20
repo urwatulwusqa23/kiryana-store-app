@@ -4,7 +4,7 @@ import {
   TrendingUp, TrendingDown, Minus, AlertTriangle, CheckCircle,
   BookOpen, Zap, BarChart2, List, Lightbulb, FileDown,
 } from 'lucide-react'
-import { saleApi } from '../services/api'
+import { saleApi, expenseApi } from '../services/api'
 import toast from 'react-hot-toast'
 
 /* ─── Style constants ─────────────────────────────────────────── */
@@ -47,12 +47,14 @@ const QUICK_PRESETS = [
   { label: 'LESCO Bill',    catId: 'bijli',    amount: 4800, note: 'LESCO electricity bill' },
 ]
 
-/* ─── localStorage helpers ────────────────────────────────────── */
-const EXP_KEY = 'k_expenses'
-const loadExp = () => JSON.parse(localStorage.getItem(EXP_KEY) || '[]')
-const saveExp = d => localStorage.setItem(EXP_KEY, JSON.stringify(d))
-const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2)
 const todayStr = () => new Date().toISOString().split('T')[0]
+
+// API expenses come back as { id, category, amount, note, date, createdAt } — the rest of
+// this file was written against a localStorage shape with a string `date` (yyyy-mm-dd),
+// so normalize on the way in.
+function fromApi(e) {
+  return { id: e.id, category: e.category, amount: e.amount, note: e.note || '', date: (e.date || '').split('T')[0], createdAt: e.createdAt }
+}
 
 function filterPeriod(expenses, period) {
   const now = new Date()
@@ -541,7 +543,7 @@ function AddTab({ onAdd }) {
   function handleAdd() {
     if (!cat)                          return toast.error('Select a category first')
     if (!amount || Number(amount) <= 0) return toast.error('Enter a valid amount')
-    onAdd({ id: uid(), category: cat.id, amount: Number(amount), note: note.trim(), date, createdAt: new Date().toISOString() })
+    onAdd({ category: cat.id, amount: Number(amount), note: note.trim(), date })
     toast.success(`${cat.label} — Rs ${Number(amount).toLocaleString()} added`)
     setAmount('')
     setNote('')
@@ -1080,23 +1082,41 @@ const TABS = [
 ]
 
 export default function KharchaKhata() {
-  const [expenses, setExpenses] = useState(loadExp)
+  const [expenses, setExpenses] = useState([])
   const [sales, setSales]       = useState([])
   const [period, setPeriod]     = useState('month')
   const [tab, setTab]           = useState('overview')
 
+  function loadExpenses() {
+    expenseApi.getAll().then(d => setExpenses(d.map(fromApi))).catch(e => toast.error(e.message))
+  }
+
   useEffect(() => {
     saleApi.getAll().then(setSales).catch(() => {})
+    loadExpenses()
   }, [])
 
   const filtered = useMemo(() => filterPeriod(expenses, period), [expenses, period])
 
-  function addExpense(e)    { const n = [...expenses, e]; setExpenses(n); saveExp(n) }
-  function editExpense(upd) { const n = expenses.map(e => e.id === upd.id ? upd : e); setExpenses(n); saveExp(n) }
-  function delExpense(id)   {
+  async function addExpense(e) {
+    try {
+      await expenseApi.create({ category: e.category, amount: e.amount, note: e.note, date: e.date })
+      loadExpenses()
+    } catch (err) { toast.error(err.message) }
+  }
+  async function editExpense(upd) {
+    try {
+      await expenseApi.update(upd.id, { category: upd.category, amount: upd.amount, note: upd.note, date: upd.date })
+      loadExpenses()
+    } catch (err) { toast.error(err.message) }
+  }
+  async function delExpense(id) {
     if (!confirm('Delete this expense?')) return
-    const n = expenses.filter(e => e.id !== id); setExpenses(n); saveExp(n)
-    toast.success('Expense deleted')
+    try {
+      await expenseApi.delete(id)
+      loadExpenses()
+      toast.success('Expense deleted')
+    } catch (err) { toast.error(err.message) }
   }
 
   const periodSales = useMemo(() => filterSalesPeriod(sales, period), [sales, period])
