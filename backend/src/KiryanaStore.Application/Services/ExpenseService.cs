@@ -5,18 +5,21 @@ using KiryanaStore.Domain.Interfaces;
 
 namespace KiryanaStore.Application.Services;
 
-public class ExpenseService(IRepository<Expense> expenseRepo, ICurrentUserContext currentUser) : IExpenseService
+public class ExpenseService(IExpenseRepository expenseRepo, ICurrentUserContext currentUser) : IExpenseService
 {
-    public async Task<IEnumerable<ExpenseDto>> GetAllAsync(DateTime? from, DateTime? to)
+    public async Task<IEnumerable<ExpenseDto>> GetAllAsync(DateTime? from, DateTime? to, int page = 1, int pageSize = 100)
     {
-        var all = (await expenseRepo.GetAllAsync()).AsEnumerable();
-        if (from.HasValue) all = all.Where(e => e.Date >= from.Value);
-        if (to.HasValue) all = all.Where(e => e.Date <= to.Value);
-        return all.OrderByDescending(e => e.Date).ThenByDescending(e => e.CreatedAt).Select(MapToDto);
+        page = page < 1 ? 1 : page;
+        pageSize = Math.Clamp(pageSize, 1, 200);
+
+        var filtered = await expenseRepo.GetFilteredAsync(from, to, page, pageSize);
+        return filtered.Select(MapToDto);
     }
 
     public async Task<ExpenseDto> CreateAsync(CreateExpenseDto dto)
     {
+        ValidateExpense(dto.Category, dto.Amount);
+
         var entity = new Expense
         {
             StoreId = currentUser.StoreId,
@@ -31,6 +34,8 @@ public class ExpenseService(IRepository<Expense> expenseRepo, ICurrentUserContex
 
     public async Task<ExpenseDto?> UpdateAsync(int id, UpdateExpenseDto dto)
     {
+        ValidateExpense(dto.Category, dto.Amount);
+
         var entity = await expenseRepo.GetByIdAsync(id);
         if (entity is null) return null;
         entity.Category = dto.Category;
@@ -47,6 +52,14 @@ public class ExpenseService(IRepository<Expense> expenseRepo, ICurrentUserContex
         if (entity is null) return false;
         await expenseRepo.DeleteAsync(id);
         return true;
+    }
+
+    private static void ValidateExpense(string category, decimal amount)
+    {
+        if (string.IsNullOrWhiteSpace(category))
+            throw new InvalidOperationException("Category is required");
+        if (amount < 0.01m)
+            throw new InvalidOperationException("Amount must be greater than 0");
     }
 
     private static ExpenseDto MapToDto(Expense e) => new(e.Id, e.Category, e.Amount, e.Note, e.Date, e.CreatedAt);

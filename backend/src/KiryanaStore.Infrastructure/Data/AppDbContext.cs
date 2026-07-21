@@ -65,5 +65,20 @@ public class AppDbContext(DbContextOptions<AppDbContext> options, ICurrentUserCo
         modelBuilder.Entity<SaleItem>().Property(s => s.UnitPrice).HasPrecision(18, 2);
         modelBuilder.Entity<SaleItem>().Property(s => s.UnitCost).HasPrecision(18, 2);
         modelBuilder.Entity<Expense>().Property(e => e.Amount).HasPrecision(18, 2);
+
+        // StoreId indexes: every tenant-scoped query filter above (WHERE StoreId = X) hits
+        // these, plus a few composite indexes for the most common filtered/sorted lookups.
+        modelBuilder.Entity<Sale>().HasIndex(s => s.StoreId);
+        modelBuilder.Entity<Customer>().HasIndex(c => c.StoreId);
+        modelBuilder.Entity<Item>().HasIndex(i => i.StoreId);
+        modelBuilder.Entity<Supplier>().HasIndex(s => s.StoreId);
+        modelBuilder.Entity<Purchase>().HasIndex(p => p.StoreId);
+        modelBuilder.Entity<CreditTransaction>().HasIndex(t => t.StoreId);
+        modelBuilder.Entity<Expense>().HasIndex(e => e.StoreId);
+
+        modelBuilder.Entity<Sale>().HasIndex(s => new { s.StoreId, s.SaleDate });
+        modelBuilder.Entity<Sale>().HasIndex(s => new { s.StoreId, s.OrderStatus });
+        modelBuilder.Entity<Expense>().HasIndex(e => new { e.StoreId, e.Date });
+        modelBuilder.Entity<CreditTransaction>().HasIndex(t => new { t.StoreId, t.CustomerId });
     }
 }

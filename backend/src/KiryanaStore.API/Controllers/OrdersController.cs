@@ -1,9 +1,11 @@
+using System.Security.Cryptography;
 using KiryanaStore.Application.DTOs;
 using KiryanaStore.Domain.Entities;
 using KiryanaStore.Domain.Interfaces;
 using KiryanaStore.Infrastructure.Data;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 
 namespace KiryanaStore.API.Controllers;
@@ -17,16 +19,27 @@ public class OrdersController(AppDbContext db, ICurrentUserContext currentUser) 
 {
     [Authorize(Roles = "Owner,Employee,Rider")]
     [HttpGet]
-    public async Task<IActionResult> GetAll()
+    public async Task<IActionResult> GetAll([FromQuery] DateTime? from, [FromQuery] DateTime? to,
+        [FromQuery] int page = 1, [FromQuery] int pageSize = 100)
     {
+        page = page < 1 ? 1 : page;
+        pageSize = Math.Clamp(pageSize, 1, 200);
+
+        // Default to the last 90 days when no explicit range is given, so this endpoint
+        // doesn't have to scan/return the full order history on every load.
+        var effectiveFrom = from ?? DateTime.UtcNow.AddDays(-90);
+
         var query = db.Sales.Include(s => s.Items).ThenInclude(i => i.Item)
-            .Where(s => s.OrderStatus != OrderStatus.None);
+            .Where(s => s.OrderStatus != OrderStatus.None && s.SaleDate >= effectiveFrom);
+        if (to.HasValue) query = query.Where(s => s.SaleDate <= to.Value);
 
         if (currentUser.Role == "Rider")
             query = query.Where(s => s.RiderId == currentUser.UserId
                 || (s.RiderId == null && s.OrderStatus == OrderStatus.Pending));
 
-        var orders = await query.OrderByDescending(s => s.SaleDate).ToListAsync();
+        var orders = await query.OrderByDescending(s => s.SaleDate)
+            .Skip((page - 1) * pageSize).Take(pageSize)
+            .ToListAsync();
         var riderNames = await GetRiderNamesAsync(orders);
         return Ok(orders.Select(o => ToDto(o, riderNames)));
     }
@@ -44,6 +57,10 @@ public class OrdersController(AppDbContext db, ICurrentUserContext currentUser) 
     [HttpPost]
     public async Task<IActionResult> Place(CreateOrderDto dto)
     {
+        if (dto.Items is null || dto.Items.Count == 0) return BadRequest(new { error = "Order must have at least one item" });
+        if (string.IsNullOrWhiteSpace(dto.DeliveryAddress)) return BadRequest(new { error = "Delivery address is required" });
+        if (dto.Items.Any(i => i.ItemId < 1 || i.Quantity < 1)) return BadRequest(new { error = "Invalid item or quantity" });
+
         var store = await db.Stores.IgnoreQueryFilters().FirstOrDefaultAsync();
         if (store is null) return BadRequest(new { error = "Store not found" });
 
@@ -73,7 +90,9 @@ public class OrdersController(AppDbContext db, ICurrentUserContext currentUser) 
             Items = saleItems,
             OrderStatus = OrderStatus.Pending,
             DeliveryAddress = dto.DeliveryAddress,
-            CustomerRef = dto.CustomerRef
+            // Generated server-side (never trust a client-supplied ref) so it can't be
+            // guessed/enumerated to read another customer's orders via GET /orders/mine.
+            CustomerRef = GenerateCustomerRef()
         };
         db.Sales.Add(sale);
         await db.SaveChangesAsync();
@@ -84,6 +103,7 @@ public class OrdersController(AppDbContext db, ICurrentUserContext currentUser) 
     }
 
     [AllowAnonymous]
+    [EnableRateLimiting("orders-lookup")]
     [HttpGet("mine")]
     public async Task<IActionResult> Mine([FromQuery] string? customerRef)
     {
@@ -142,6 +162,12 @@ public class OrdersController(AppDbContext db, ICurrentUserContext currentUser) 
 
         var riderNames = await GetRiderNamesAsync([sale]);
         return Ok(ToDto(sale, riderNames));
+    }
+
+    private static string GenerateCustomerRef()
+    {
+        var bytes = RandomNumberGenerator.GetBytes(24);
+        return Convert.ToBase64String(bytes).Replace('+', '-').Replace('/', '_').TrimEnd('=');
     }
 
     private async Task<Dictionary<int, string>> GetRiderNamesAsync(IEnumerable<Sale> sales)

@@ -9,35 +9,35 @@ import toast from 'react-hot-toast'
 
 /* ─── Style constants ─────────────────────────────────────────── */
 const KK = {
-  card:    '#14100c',
-  card2:   '#1a1410',
-  border:  '#2e2218',
-  border2: '#443220',
+  card:    'var(--surface)',
+  card2:   'var(--surface2)',
+  border:  'var(--border)',
+  border2: 'var(--border2)',
   serif:   "'Playfair Display', Georgia, 'Times New Roman', serif",
   mono:    "'IBM Plex Mono', 'Courier New', Courier, monospace",
   ledgerLines: `repeating-linear-gradient(
     to bottom,
     transparent,
     transparent calc(1.75rem - 1px),
-    rgba(180,140,70,0.07) calc(1.75rem - 1px),
-    rgba(180,140,70,0.07) 1.75rem
+    rgba(44,36,22,0.04) calc(1.75rem - 1px),
+    rgba(44,36,22,0.04) 1.75rem
   )`,
 }
 
 /* ─── Category master data ────────────────────────────────────── */
 export const CATS = [
-  { id: 'bijli',     label: 'Bijli',      urdu: 'بجلی',       icon: '⚡', color: '#eab308', deductible: true  },
-  { id: 'kiraya',    label: 'Kiraya',     urdu: 'کرایہ',      icon: '🏠', color: '#3b82f6', deductible: true  },
-  { id: 'tankhwa',   label: 'Tankhwa',   urdu: 'تنخواہ',     icon: '👷', color: '#10b981', deductible: true  },
-  { id: 'thailay',   label: 'Thailay',   urdu: 'تھیلے',      icon: '🛍',  color: '#f97316', deductible: false },
+  { id: 'bijli',     label: 'Bijli',      urdu: 'بجلی',       icon: '⚡', color: 'var(--gold)', deductible: true  },
+  { id: 'kiraya',    label: 'Kiraya',     urdu: 'کرایہ',      icon: '🏠', color: 'var(--blue)', deductible: true  },
+  { id: 'tankhwa',   label: 'Tankhwa',   urdu: 'تنخواہ',     icon: '👷', color: 'var(--forest)', deductible: true  },
+  { id: 'thailay',   label: 'Thailay',   urdu: 'تھیلے',      icon: '🛍',  color: 'var(--orange)', deductible: false },
   { id: 'chai',      label: 'Chai Pani', urdu: 'چائے پانی',  icon: '☕', color: 'var(--purple)', deductible: false },
-  { id: 'phone',     label: 'Phone',     urdu: 'فون',         icon: '📱', color: '#06b6d4', deductible: true  },
-  { id: 'marmmat',   label: 'Marmmat',   urdu: 'مرمت',       icon: '🔧', color: '#f59e0b', deductible: true  },
-  { id: 'transport', label: 'Transport', urdu: 'ٹرانسپورٹ',  icon: '🚗', color: '#84cc16', deductible: false },
-  { id: 'packing',   label: 'Packing',   urdu: 'پیکنگ',      icon: '📦', color: '#ec4899', deductible: false },
-  { id: 'safai',     label: 'Safai',     urdu: 'صفائی',      icon: '🧹', color: '#0ea5e9', deductible: false },
-  { id: 'tax',       label: 'Tax',       urdu: 'ٹیکس',       icon: '📋', color: '#ef4444', deductible: false },
-  { id: 'aur',       label: 'Aur',       urdu: 'اور',        icon: '📎', color: '#6b7280', deductible: false },
+  { id: 'phone',     label: 'Phone',     urdu: 'فون',         icon: '📱', color: 'var(--blue)', deductible: true  },
+  { id: 'marmmat',   label: 'Marmmat',   urdu: 'مرمت',       icon: '🔧', color: 'var(--gold)', deductible: true  },
+  { id: 'transport', label: 'Transport', urdu: 'ٹرانسپورٹ',  icon: '🚗', color: 'var(--forest)', deductible: false },
+  { id: 'packing',   label: 'Packing',   urdu: 'پیکنگ',      icon: '📦', color: 'var(--red)', deductible: false },
+  { id: 'safai',     label: 'Safai',     urdu: 'صفائی',      icon: '🧹', color: 'var(--blue)', deductible: false },
+  { id: 'tax',       label: 'Tax',       urdu: 'ٹیکس',       icon: '📋', color: 'var(--accent)', deductible: false },
+  { id: 'aur',       label: 'Aur',       urdu: 'اور',        icon: '📎', color: 'var(--text3)', deductible: false },
 ]
 
 const QUICK_PRESETS = [
@@ -95,7 +95,7 @@ function Donut({ slices, size = 120, thick = 16 }) {
   let cum = 0
   return (
     <svg width={size} height={size} style={{ transform: 'rotate(-90deg)', display: 'block' }}>
-      <circle cx={cx} cy={cy} r={R} fill="none" strokeWidth={thick} stroke="rgba(255,255,255,0.05)" />
+      <circle cx={cx} cy={cy} r={R} fill="none" strokeWidth={thick} stroke="rgba(44,36,22,0.05)" />
       {total > 0 && slices.filter(d => d.value > 0).map((d, i) => {
         const seg = (d.value / total) * C
         const off = -cum
@@ -119,7 +119,7 @@ function KkCard({ children, style = {}, lined = false }) {
       backgroundImage: lined ? KK.ledgerLines : undefined,
       backgroundColor: KK.card2,
       border: `1px solid ${KK.border}`,
-      borderRadius: 10,
+      borderRadius: 'var(--r)',
       padding: 16,
       ...style,
     }}>
@@ -134,11 +134,11 @@ function KkTooltip({ x, y, content }) {
   return (
     <div style={{
       position: 'fixed', left: x + 14, top: y - 10,
-      background: '#14100c', border: '1px solid #443220',
-      borderRadius: 7, padding: '8px 12px', fontSize: 11,
-      color: '#e2e8f0', pointerEvents: 'none', zIndex: 9999,
+      background: 'var(--surface)', border: '1px solid var(--border2)',
+      borderRadius: 'var(--r-sm)', padding: '8px 12px', fontSize: 11,
+      color: 'var(--text)', pointerEvents: 'none', zIndex: 9999,
       fontFamily: "'IBM Plex Mono', monospace", whiteSpace: 'nowrap',
-      boxShadow: '0 4px 20px rgba(0,0,0,0.7)', lineHeight: 1.6,
+      boxShadow: '0 4px 20px rgba(44,36,22,0.15)', lineHeight: 1.6,
     }}>
       {content}
     </div>
@@ -149,21 +149,21 @@ function KkTooltip({ x, y, content }) {
 function KkDrillModal({ title, onClose, children }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4"
-      style={{ background: 'rgba(0,0,0,0.88)' }}
+      style={{ background: 'rgba(0,0,0,0.5)' }}
       onClick={e => { if (e.target === e.currentTarget) onClose() }}>
       <div style={{
-        background: '#1a1410', border: '1px solid #2e2218',
-        borderRadius: 12, width: '100%', maxWidth: 420,
+        background: 'var(--surface2)', border: '1px solid var(--border)',
+        borderRadius: 'var(--r-lg)', width: '100%', maxWidth: 420,
         maxHeight: '85vh', display: 'flex', flexDirection: 'column',
-        boxShadow: '0 20px 60px rgba(0,0,0,0.8)',
+        boxShadow: '0 12px 40px rgba(44,36,22,0.16)',
       }}>
         <div style={{
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-          padding: '14px 18px', borderBottom: '1px solid #2e2218', flexShrink: 0,
+          padding: '14px 18px', borderBottom: '1px solid var(--border)', flexShrink: 0,
         }}>
-          <span style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700, fontSize: 15, color: '#e2e8f0' }}>{title}</span>
+          <span style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700, fontSize: 15, color: 'var(--text)' }}>{title}</span>
           <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
-            <X size={14} style={{ color: '#64748b' }} />
+            <X size={14} style={{ color: 'var(--text3)' }} />
           </button>
         </div>
         <div style={{ overflowY: 'auto', padding: '14px 18px' }}>
@@ -180,53 +180,53 @@ function ProfitMeter({ revenue, cogs, expTotal }) {
   const net    = gross - expTotal
   const margin = revenue > 0 ? (net / revenue) * 100 : 0
   const isLoss = net < 0
-  const color  = isLoss ? '#dc2626' : margin >= 15 ? '#16a34a' : margin >= 5 ? '#ca8a04' : '#c2410c'
+  const color  = isLoss ? 'var(--accent)' : margin >= 15 ? 'var(--forest)' : margin >= 5 ? 'var(--gold)' : 'var(--orange)'
 
   const Rs = n => <span style={{ fontFamily: KK.mono }}>{`Rs ${Math.abs(n).toLocaleString()}`}</span>
 
   return (
     <div style={{
-      background: `linear-gradient(135deg, ${isLoss ? '#1c0a0a' : '#0a1c10'}, ${KK.card})`,
+      background: `linear-gradient(135deg, ${isLoss ? "rgba(193,57,43,0.06)" : "rgba(76,122,65,0.06)"}, ${KK.card})`,
       border: `1px solid ${isLoss ? 'rgba(220,38,38,0.35)' : 'rgba(22,163,74,0.3)'}`,
-      borderRadius: 10, padding: '14px 18px',
+      borderRadius: 'var(--r)', padding: '14px 18px',
     }}>
       <div className="flex flex-wrap items-center justify-between gap-3">
         {/* Formula */}
         <div className="flex flex-wrap items-center gap-1.5 text-sm">
-          <span style={{ color: '#94a3b8', fontFamily: KK.mono, fontSize: 12 }}>
+          <span style={{ color: 'var(--text2)', fontFamily: KK.mono, fontSize: 12 }}>
             {Rs(revenue)}</span>
-          <span style={{ color: '#475569', fontSize: 11 }}>−</span>
-          <span style={{ color: '#64748b', fontFamily: KK.mono, fontSize: 12 }}>
+          <span style={{ color: 'var(--text3)', fontSize: 11 }}>−</span>
+          <span style={{ color: 'var(--text3)', fontFamily: KK.mono, fontSize: 12 }}>
             {Rs(cogs)}</span>
-          <span style={{ color: '#475569', fontSize: 11 }}>−</span>
-          <span style={{ color: '#f97316', fontFamily: KK.mono, fontSize: 12 }}>
+          <span style={{ color: 'var(--text3)', fontSize: 11 }}>−</span>
+          <span style={{ color: 'var(--orange)', fontFamily: KK.mono, fontSize: 12 }}>
             {Rs(expTotal)}</span>
-          <span style={{ color: '#475569', fontSize: 11 }}>=</span>
+          <span style={{ color: 'var(--text3)', fontSize: 11 }}>=</span>
           <span style={{ fontFamily: KK.mono, fontSize: 15, fontWeight: 700, color }}>
             {isLoss ? '−' : '+'}{Rs(net)}
           </span>
           {isLoss && (
             <span style={{
               fontFamily: KK.serif, fontWeight: 700, fontSize: 9, letterSpacing: 2,
-              padding: '2px 7px', border: `1.5px solid ${color}`, borderRadius: 2,
+              padding: '2px 7px', border: `1.5px solid ${color}`, borderRadius: 'var(--r-sm)',
               color, textTransform: 'uppercase', transform: 'rotate(-2deg)', display: 'inline-block',
             }}>DEFICIT</span>
           )}
         </div>
         {/* Labels */}
-        <div className="flex gap-3 text-[10px]" style={{ color: '#475569' }}>
+        <div className="flex gap-3 text-[10px]" style={{ color: 'var(--text3)' }}>
           <span>Sales</span>
           <span>COGS</span>
-          <span style={{ color: '#f97316' }}>Expenses</span>
+          <span style={{ color: 'var(--orange)' }}>Expenses</span>
           <span style={{ color, fontWeight: 700 }}>Net Profit</span>
         </div>
       </div>
       {/* Health bar */}
       {revenue > 0 && (
         <div className="mt-2.5 flex items-center gap-2">
-          <div style={{ flex: 1, height: 4, background: 'rgba(255,255,255,0.06)', borderRadius: 2, overflow: 'hidden' }}>
+          <div style={{ flex: 1, height: 4, background: 'rgba(44,36,22,0.06)', borderRadius: 'var(--r-sm)', overflow: 'hidden' }}>
             <div style={{
-              height: '100%', borderRadius: 2, background: color,
+              height: '100%', borderRadius: 'var(--r-sm)', background: color,
               width: `${Math.min(100, Math.max(0, margin))}%`,
               transition: 'width 0.6s ease',
             }} />
@@ -268,7 +268,7 @@ function OverviewTab({ expenses, sales, period }) {
   expenses.forEach(e => { byCat[e.category] = (byCat[e.category] || 0) + e.amount })
   const catSlices = Object.entries(byCat)
     .sort((a, b) => b[1] - a[1]).slice(0, 5)
-    .map(([id, value]) => ({ value, color: CATS.find(c => c.id === id)?.color || '#6b7280', label: id }))
+    .map(([id, value]) => ({ value, color: CATS.find(c => c.id === id)?.color || 'var(--text3)', label: id }))
 
   /* Drill helpers */
   function openDayDrill(day) {
@@ -278,31 +278,31 @@ function OverviewTab({ expenses, sales, period }) {
       children: (
         <div className="space-y-4">
           <div>
-            <p style={{ fontFamily: KK.serif, fontSize: 10, letterSpacing: 1, textTransform: 'uppercase', color: '#64748b', marginBottom: 8 }}>
+            <p style={{ fontFamily: KK.serif, fontSize: 10, letterSpacing: 1, textTransform: 'uppercase', color: 'var(--text3)', marginBottom: 8 }}>
               Sales ({day.daySales.length}) · Rs {day.rev.toLocaleString()}
             </p>
             {day.daySales.length === 0
-              ? <p style={{ fontSize: 12, color: '#475569', fontFamily: KK.serif }}>No sales recorded</p>
+              ? <p style={{ fontSize: 12, color: 'var(--text3)', fontFamily: KK.serif }}>No sales recorded</p>
               : day.daySales.map((s, i) => (
-                <div key={s.id || i} style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 0', borderBottom: '1px solid #2e2218' }}>
-                  <span style={{ fontSize: 11, color: '#94a3b8' }}>#{s.id} · {s.customerName || 'Walk-in'}</span>
-                  <span style={{ fontFamily: KK.mono, fontWeight: 700, fontSize: 11, color: '#60a5fa' }}>Rs {s.totalRevenue?.toLocaleString()}</span>
+                <div key={s.id || i} style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 0', borderBottom: '1px solid var(--border)' }}>
+                  <span style={{ fontSize: 11, color: 'var(--text2)' }}>#{s.id} · {s.customerName || 'Walk-in'}</span>
+                  <span style={{ fontFamily: KK.mono, fontWeight: 700, fontSize: 11, color: 'var(--blue)' }}>Rs {s.totalRevenue?.toLocaleString()}</span>
                 </div>
               ))
             }
           </div>
           <div>
-            <p style={{ fontFamily: KK.serif, fontSize: 10, letterSpacing: 1, textTransform: 'uppercase', color: '#64748b', marginBottom: 8 }}>
+            <p style={{ fontFamily: KK.serif, fontSize: 10, letterSpacing: 1, textTransform: 'uppercase', color: 'var(--text3)', marginBottom: 8 }}>
               Expenses ({day.dayExps.length}) · Rs {day.exp.toLocaleString()}
             </p>
             {day.dayExps.length === 0
-              ? <p style={{ fontSize: 12, color: '#475569', fontFamily: KK.serif }}>No expenses recorded</p>
+              ? <p style={{ fontSize: 12, color: 'var(--text3)', fontFamily: KK.serif }}>No expenses recorded</p>
               : day.dayExps.map(e => {
                 const cat = CATS.find(c => c.id === e.category)
                 return (
-                  <div key={e.id} style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 0', borderBottom: '1px solid #2e2218' }}>
-                    <span style={{ fontSize: 11, color: '#94a3b8' }}>{cat?.icon} {cat?.label}{e.note ? ` · ${e.note}` : ''}</span>
-                    <span style={{ fontFamily: KK.mono, fontWeight: 700, fontSize: 11, color: '#f97316' }}>Rs {e.amount.toLocaleString()}</span>
+                  <div key={e.id} style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 0', borderBottom: '1px solid var(--border)' }}>
+                    <span style={{ fontSize: 11, color: 'var(--text2)' }}>{cat?.icon} {cat?.label}{e.note ? ` · ${e.note}` : ''}</span>
+                    <span style={{ fontFamily: KK.mono, fontWeight: 700, fontSize: 11, color: 'var(--orange)' }}>Rs {e.amount.toLocaleString()}</span>
                   </div>
                 )
               })
@@ -317,20 +317,20 @@ function OverviewTab({ expenses, sales, period }) {
     const gross = revenue - cogs
     const net   = gross - expTotal
     const isLoss = net < 0
-    const netColor = isLoss ? '#dc2626' : net / (revenue || 1) >= 0.15 ? '#16a34a' : '#ca8a04'
+    const netColor = isLoss ? 'var(--accent)' : net / (revenue || 1) >= 0.15 ? 'var(--forest)' : 'var(--gold)'
     const sortedCats = Object.entries(byCat).sort((a, b) => b[1] - a[1])
     let children
     if (label === 'Revenue') {
       children = (
         <div>
-          <p style={{ fontFamily: KK.mono, fontSize: 20, fontWeight: 700, color: '#60a5fa', marginBottom: 12 }}>Rs {revenue.toLocaleString()}</p>
-          <p style={{ fontFamily: KK.serif, fontSize: 10, letterSpacing: 1, textTransform: 'uppercase', color: '#64748b', marginBottom: 8 }}>{periodSales.length} transactions</p>
+          <p style={{ fontFamily: KK.mono, fontSize: 20, fontWeight: 700, color: 'var(--blue)', marginBottom: 12 }}>Rs {revenue.toLocaleString()}</p>
+          <p style={{ fontFamily: KK.serif, fontSize: 10, letterSpacing: 1, textTransform: 'uppercase', color: 'var(--text3)', marginBottom: 8 }}>{periodSales.length} transactions</p>
           {periodSales.length === 0
-            ? <p style={{ fontSize: 12, color: '#475569', fontFamily: KK.serif }}>No sales in this period</p>
+            ? <p style={{ fontSize: 12, color: 'var(--text3)', fontFamily: KK.serif }}>No sales in this period</p>
             : periodSales.slice(0, 20).map((s, i) => (
-              <div key={s.id || i} style={{ display: 'flex', justifyContent: 'space-between', padding: '5px 0', borderBottom: '1px solid #2e2218' }}>
-                <span style={{ fontSize: 11, color: '#94a3b8' }}>{s.customerName || 'Walk-in'} · {new Date(s.saleDate).toLocaleDateString('en-PK', { day: 'numeric', month: 'short' })}</span>
-                <span style={{ fontFamily: KK.mono, fontWeight: 700, fontSize: 11, color: '#60a5fa' }}>Rs {s.totalRevenue?.toLocaleString()}</span>
+              <div key={s.id || i} style={{ display: 'flex', justifyContent: 'space-between', padding: '5px 0', borderBottom: '1px solid var(--border)' }}>
+                <span style={{ fontSize: 11, color: 'var(--text2)' }}>{s.customerName || 'Walk-in'} · {new Date(s.saleDate).toLocaleDateString('en-PK', { day: 'numeric', month: 'short' })}</span>
+                <span style={{ fontFamily: KK.mono, fontWeight: 700, fontSize: 11, color: 'var(--blue)' }}>Rs {s.totalRevenue?.toLocaleString()}</span>
               </div>
             ))
           }
@@ -339,24 +339,24 @@ function OverviewTab({ expenses, sales, period }) {
     } else if (label === 'Expenses') {
       children = (
         <div>
-          <p style={{ fontFamily: KK.mono, fontSize: 20, fontWeight: 700, color: '#f97316', marginBottom: 12 }}>Rs {expTotal.toLocaleString()}</p>
-          <p style={{ fontFamily: KK.serif, fontSize: 10, letterSpacing: 1, textTransform: 'uppercase', color: '#64748b', marginBottom: 8 }}>{expenses.length} entries · by category</p>
+          <p style={{ fontFamily: KK.mono, fontSize: 20, fontWeight: 700, color: 'var(--orange)', marginBottom: 12 }}>Rs {expTotal.toLocaleString()}</p>
+          <p style={{ fontFamily: KK.serif, fontSize: 10, letterSpacing: 1, textTransform: 'uppercase', color: 'var(--text3)', marginBottom: 8 }}>{expenses.length} entries · by category</p>
           {sortedCats.length === 0
-            ? <p style={{ fontSize: 12, color: '#475569', fontFamily: KK.serif }}>No expenses in this period</p>
+            ? <p style={{ fontSize: 12, color: 'var(--text3)', fontFamily: KK.serif }}>No expenses in this period</p>
             : sortedCats.map(([id, amt]) => {
               const cat = CATS.find(c => c.id === id)
               const pct = expTotal > 0 ? Math.round(amt / expTotal * 100) : 0
               return (
                 <div key={id} style={{ marginBottom: 10 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 3 }}>
-                    <span style={{ fontSize: 12, color: '#cbd5e1' }}>{cat?.icon} {cat?.label}</span>
+                    <span style={{ fontSize: 12, color: 'var(--text)' }}>{cat?.icon} {cat?.label}</span>
                     <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
                       <span style={{ fontFamily: KK.mono, fontSize: 11, color: cat?.color }}>Rs {amt.toLocaleString()}</span>
-                      <span style={{ fontSize: 10, color: '#475569' }}>{pct}%</span>
+                      <span style={{ fontSize: 10, color: 'var(--text3)' }}>{pct}%</span>
                     </div>
                   </div>
-                  <div style={{ height: 3, background: 'rgba(255,255,255,0.05)', borderRadius: 2, overflow: 'hidden' }}>
-                    <div style={{ height: '100%', width: `${pct}%`, background: cat?.color || '#6b7280', borderRadius: 2 }} />
+                  <div style={{ height: 3, background: 'rgba(44,36,22,0.05)', borderRadius: 'var(--r-sm)', overflow: 'hidden' }}>
+                    <div style={{ height: '100%', width: `${pct}%`, background: cat?.color || 'var(--text3)', borderRadius: 'var(--r-sm)' }} />
                   </div>
                 </div>
               )
@@ -367,30 +367,30 @@ function OverviewTab({ expenses, sales, period }) {
     } else if (label === 'Gross Profit') {
       children = (
         <div>
-          <p style={{ fontFamily: KK.mono, fontSize: 20, fontWeight: 700, color: '#a3e635', marginBottom: 12 }}>Rs {gross.toLocaleString()}</p>
-          <div style={{ padding: '10px 14px', background: 'rgba(255,255,255,0.03)', borderRadius: 8, marginBottom: 12 }}>
-            <p style={{ fontFamily: KK.mono, fontSize: 12, color: '#94a3b8' }}>Revenue&nbsp;&nbsp;<span style={{ color: '#60a5fa' }}>Rs {revenue.toLocaleString()}</span></p>
-            <p style={{ fontFamily: KK.mono, fontSize: 12, color: '#94a3b8', marginTop: 4 }}>− COGS&nbsp;&nbsp;&nbsp;<span style={{ color: '#64748b' }}>Rs {cogs.toLocaleString()}</span></p>
-            <div style={{ height: 1, background: '#2e2218', margin: '8px 0' }} />
-            <p style={{ fontFamily: KK.mono, fontSize: 14, fontWeight: 700, color: '#a3e635' }}>= Rs {gross.toLocaleString()}</p>
+          <p style={{ fontFamily: KK.mono, fontSize: 20, fontWeight: 700, color: 'var(--forest)', marginBottom: 12 }}>Rs {gross.toLocaleString()}</p>
+          <div style={{ padding: '10px 14px', background: 'rgba(44,36,22,0.03)', borderRadius: 'var(--r)', marginBottom: 12 }}>
+            <p style={{ fontFamily: KK.mono, fontSize: 12, color: 'var(--text2)' }}>Revenue&nbsp;&nbsp;<span style={{ color: 'var(--blue)' }}>Rs {revenue.toLocaleString()}</span></p>
+            <p style={{ fontFamily: KK.mono, fontSize: 12, color: 'var(--text2)', marginTop: 4 }}>− COGS&nbsp;&nbsp;&nbsp;<span style={{ color: 'var(--text3)' }}>Rs {cogs.toLocaleString()}</span></p>
+            <div style={{ height: 1, background: 'var(--border)', margin: '8px 0' }} />
+            <p style={{ fontFamily: KK.mono, fontSize: 14, fontWeight: 700, color: 'var(--forest)' }}>= Rs {gross.toLocaleString()}</p>
           </div>
-          {revenue > 0 && <p style={{ fontSize: 12, color: '#64748b' }}>Gross margin: {((gross / revenue) * 100).toFixed(1)}%</p>}
+          {revenue > 0 && <p style={{ fontSize: 12, color: 'var(--text3)' }}>Gross margin: {((gross / revenue) * 100).toFixed(1)}%</p>}
         </div>
       )
     } else {
       children = (
         <div>
           <p style={{ fontFamily: KK.mono, fontSize: 20, fontWeight: 700, color: netColor, marginBottom: 12 }}>{isLoss ? '−' : '+'} Rs {Math.abs(net).toLocaleString()}</p>
-          <div style={{ padding: '10px 14px', background: 'rgba(255,255,255,0.03)', borderRadius: 8, marginBottom: 12 }}>
-            <p style={{ fontFamily: KK.mono, fontSize: 12, color: '#94a3b8' }}>Revenue&nbsp;&nbsp;&nbsp;<span style={{ color: '#60a5fa' }}>Rs {revenue.toLocaleString()}</span></p>
-            <p style={{ fontFamily: KK.mono, fontSize: 12, color: '#94a3b8', marginTop: 4 }}>− COGS&nbsp;&nbsp;&nbsp;&nbsp;<span style={{ color: '#64748b' }}>Rs {cogs.toLocaleString()}</span></p>
-            <p style={{ fontFamily: KK.mono, fontSize: 12, color: '#94a3b8', marginTop: 4 }}>− Expenses <span style={{ color: '#f97316' }}>Rs {expTotal.toLocaleString()}</span></p>
-            <div style={{ height: 1, background: '#2e2218', margin: '8px 0' }} />
+          <div style={{ padding: '10px 14px', background: 'rgba(44,36,22,0.03)', borderRadius: 'var(--r)', marginBottom: 12 }}>
+            <p style={{ fontFamily: KK.mono, fontSize: 12, color: 'var(--text2)' }}>Revenue&nbsp;&nbsp;&nbsp;<span style={{ color: 'var(--blue)' }}>Rs {revenue.toLocaleString()}</span></p>
+            <p style={{ fontFamily: KK.mono, fontSize: 12, color: 'var(--text2)', marginTop: 4 }}>− COGS&nbsp;&nbsp;&nbsp;&nbsp;<span style={{ color: 'var(--text3)' }}>Rs {cogs.toLocaleString()}</span></p>
+            <p style={{ fontFamily: KK.mono, fontSize: 12, color: 'var(--text2)', marginTop: 4 }}>− Expenses <span style={{ color: 'var(--orange)' }}>Rs {expTotal.toLocaleString()}</span></p>
+            <div style={{ height: 1, background: 'var(--border)', margin: '8px 0' }} />
             <p style={{ fontFamily: KK.mono, fontSize: 14, fontWeight: 700, color: netColor }}>= {isLoss ? '−' : '+'} Rs {Math.abs(net).toLocaleString()}</p>
           </div>
           {isLoss
-            ? <p style={{ fontSize: 12, color: '#dc2626' }}>⚠ Expenses exceed gross profit by Rs {Math.abs(net).toLocaleString()}</p>
-            : <p style={{ fontSize: 12, color: '#64748b' }}>Net margin: {((net / revenue) * 100).toFixed(1)}% · Rs {net.toLocaleString()} true profit</p>
+            ? <p style={{ fontSize: 12, color: 'var(--accent)' }}>⚠ Expenses exceed gross profit by Rs {Math.abs(net).toLocaleString()}</p>
+            : <p style={{ fontSize: 12, color: 'var(--text3)' }}>Net margin: {((net / revenue) * 100).toFixed(1)}% · Rs {net.toLocaleString()} true profit</p>
           }
         </div>
       )
@@ -408,12 +408,12 @@ function OverviewTab({ expenses, sales, period }) {
         <div>
           <p style={{ fontFamily: KK.mono, fontSize: 18, fontWeight: 700, color: cat?.color, marginBottom: 12 }}>Rs {total.toLocaleString()}</p>
           {catExps.length === 0
-            ? <p style={{ fontSize: 12, color: '#475569', fontFamily: KK.serif }}>No expenses in this period</p>
+            ? <p style={{ fontSize: 12, color: 'var(--text3)', fontFamily: KK.serif }}>No expenses in this period</p>
             : catExps.map(e => (
-              <div key={e.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', padding: '7px 0', borderBottom: '1px solid #2e2218' }}>
+              <div key={e.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', padding: '7px 0', borderBottom: '1px solid var(--border)' }}>
                 <div>
-                  <span style={{ fontFamily: KK.mono, fontSize: 10, color: '#475569', display: 'block' }}>{e.date}</span>
-                  {e.note && <span style={{ fontSize: 11, color: '#94a3b8' }}>{e.note}</span>}
+                  <span style={{ fontFamily: KK.mono, fontSize: 10, color: 'var(--text3)', display: 'block' }}>{e.date}</span>
+                  {e.note && <span style={{ fontSize: 11, color: 'var(--text2)' }}>{e.note}</span>}
                 </div>
                 <span style={{ fontFamily: KK.mono, fontWeight: 700, fontSize: 12, color: cat?.color }}>Rs {e.amount.toLocaleString()}</span>
               </div>
@@ -434,19 +434,19 @@ function OverviewTab({ expenses, sales, period }) {
       {/* Stats row — clickable */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {[
-          { l: 'Revenue',      v: revenue,              c: '#60a5fa' },
-          { l: 'Expenses',     v: expTotal,             c: '#f97316' },
-          { l: 'Gross Profit', v: revenue - cogs,       c: '#a3e635' },
-          { l: 'Net Profit',   v: revenue - cogs - expTotal, c: (revenue - cogs - expTotal) < 0 ? '#dc2626' : '#16a34a' },
+          { l: 'Revenue',      v: revenue,              c: 'var(--blue)' },
+          { l: 'Expenses',     v: expTotal,             c: 'var(--orange)' },
+          { l: 'Gross Profit', v: revenue - cogs,       c: 'var(--forest)' },
+          { l: 'Net Profit',   v: revenue - cogs - expTotal, c: (revenue - cogs - expTotal) < 0 ? 'var(--accent)' : 'var(--forest)' },
         ].map(({ l, v, c }) => (
           <div key={l} onClick={() => openStatDrill(l)}
             onMouseEnter={() => setTip(t => ({ ...t, content: 'Click for breakdown →' }))}
             onMouseLeave={() => setTip(t => ({ ...t, content: null }))}
             style={{ cursor: 'pointer' }}>
             <KkCard lined>
-              <p style={{ fontFamily: KK.serif, fontSize: 10, letterSpacing: 1, textTransform: 'uppercase', color: '#64748b', marginBottom: 4 }}>{l}</p>
+              <p style={{ fontFamily: KK.serif, fontSize: 10, letterSpacing: 1, textTransform: 'uppercase', color: 'var(--text3)', marginBottom: 4 }}>{l}</p>
               <p style={{ fontFamily: KK.mono, fontSize: 15, fontWeight: 700, color: c }}>{`Rs ${Number(v || 0).toLocaleString()}`}</p>
-              <p style={{ fontSize: 9, color: '#334155', marginTop: 3 }}>tap to drill →</p>
+              <p style={{ fontSize: 9, color: 'var(--text3)', marginTop: 3 }}>tap to drill →</p>
             </KkCard>
           </div>
         ))}
@@ -454,7 +454,7 @@ function OverviewTab({ expenses, sales, period }) {
 
       {/* 7-day chart — hoverable + clickable */}
       <KkCard>
-        <p style={{ fontFamily: KK.serif, fontSize: 11, letterSpacing: 1, textTransform: 'uppercase', color: '#64748b', marginBottom: 12 }}>
+        <p style={{ fontFamily: KK.serif, fontSize: 11, letterSpacing: 1, textTransform: 'uppercase', color: 'var(--text3)', marginBottom: 12 }}>
           7-Day Revenue vs Expenses
         </p>
         <div className="flex items-end gap-2" style={{ height: 80 }}>
@@ -466,19 +466,19 @@ function OverviewTab({ expenses, sales, period }) {
                 onClick={() => openDayDrill(day)}
                 onMouseEnter={() => setTip(t => ({ ...t, content: (
                   <span>
-                    <strong style={{ color: '#e2e8f0' }}>{DAYS[day.date.getDay()]} {day.date.getDate()}</strong>
+                    <strong style={{ color: 'var(--text)' }}>{DAYS[day.date.getDay()]} {day.date.getDate()}</strong>
                     {' — '}
-                    <span style={{ color: '#60a5fa' }}>Rev Rs {day.rev.toLocaleString()}</span>
+                    <span style={{ color: 'var(--blue)' }}>Rev Rs {day.rev.toLocaleString()}</span>
                     {' · '}
-                    <span style={{ color: '#f97316' }}>Exp Rs {day.exp.toLocaleString()}</span>
+                    <span style={{ color: 'var(--orange)' }}>Exp Rs {day.exp.toLocaleString()}</span>
                   </span>
                 ) }))}
                 onMouseLeave={() => setTip(t => ({ ...t, content: null }))}>
                 <div style={{ flex: 1, width: '100%', display: 'flex', alignItems: 'flex-end', gap: 1 }}>
-                  <div style={{ flex: 1, height: `${(day.rev / maxVal) * 72}px`, minHeight: day.rev > 0 ? 3 : 1, background: isToday ? '#16a34a' : '#334155', borderRadius: '2px 2px 0 0', transition: 'height 0.4s' }} />
-                  <div style={{ flex: 1, height: `${(day.exp / maxVal) * 72}px`, minHeight: day.exp > 0 ? 3 : 1, background: '#f97316', borderRadius: '2px 2px 0 0', opacity: 0.8, transition: 'height 0.4s' }} />
+                  <div style={{ flex: 1, height: `${(day.rev / maxVal) * 72}px`, minHeight: day.rev > 0 ? 3 : 1, background: isToday ? 'var(--forest)' : 'var(--text3)', borderRadius: '2px 2px 0 0', transition: 'height 0.4s' }} />
+                  <div style={{ flex: 1, height: `${(day.exp / maxVal) * 72}px`, minHeight: day.exp > 0 ? 3 : 1, background: 'var(--orange)', borderRadius: '2px 2px 0 0', opacity: 0.8, transition: 'height 0.4s' }} />
                 </div>
-                <span style={{ fontSize: 9, color: isToday ? '#60a5fa' : '#475569', fontWeight: isToday ? 700 : 400 }}>
+                <span style={{ fontSize: 9, color: isToday ? 'var(--blue)' : 'var(--text3)', fontWeight: isToday ? 700 : 400 }}>
                   {DAYS[day.date.getDay()]}
                 </span>
               </div>
@@ -486,16 +486,16 @@ function OverviewTab({ expenses, sales, period }) {
           })}
         </div>
         <div className="flex gap-4 mt-2">
-          <span style={{ fontSize: 10, color: '#64748b' }}><span style={{ display: 'inline-block', width: 8, height: 8, background: '#16a34a', borderRadius: 1, marginRight: 4 }} />Revenue</span>
-          <span style={{ fontSize: 10, color: '#64748b' }}><span style={{ display: 'inline-block', width: 8, height: 8, background: '#f97316', borderRadius: 1, marginRight: 4 }} />Expenses</span>
-          <span style={{ fontSize: 10, color: '#334155', fontStyle: 'italic' }}>click any bar for details</span>
+          <span style={{ fontSize: 10, color: 'var(--text3)' }}><span style={{ display: 'inline-block', width: 8, height: 8, background: 'var(--forest)', borderRadius: 1, marginRight: 4 }} />Revenue</span>
+          <span style={{ fontSize: 10, color: 'var(--text3)' }}><span style={{ display: 'inline-block', width: 8, height: 8, background: 'var(--orange)', borderRadius: 1, marginRight: 4 }} />Expenses</span>
+          <span style={{ fontSize: 10, color: 'var(--text3)', fontStyle: 'italic' }}>click any bar for details</span>
         </div>
       </KkCard>
 
       {/* Category donut — legend items clickable */}
       {catSlices.length > 0 && (
         <KkCard>
-          <p style={{ fontFamily: KK.serif, fontSize: 11, letterSpacing: 1, textTransform: 'uppercase', color: '#64748b', marginBottom: 12 }}>
+          <p style={{ fontFamily: KK.serif, fontSize: 11, letterSpacing: 1, textTransform: 'uppercase', color: 'var(--text3)', marginBottom: 12 }}>
             Expense Breakdown
           </p>
           <div className="flex items-center gap-6">
@@ -511,10 +511,10 @@ function OverviewTab({ expenses, sales, period }) {
                     onMouseEnter={() => setTip(t => ({ ...t, content: `${cat?.label}: Rs ${s.value.toLocaleString()} (${pct}%) — click to view` }))}
                     onMouseLeave={() => setTip(t => ({ ...t, content: null }))}>
                     <span style={{ fontSize: 12 }}>{cat?.icon}</span>
-                    <div style={{ flex: 1, height: 4, background: 'rgba(255,255,255,0.05)', borderRadius: 2, overflow: 'hidden' }}>
-                      <div style={{ height: '100%', width: `${pct}%`, background: s.color, borderRadius: 2 }} />
+                    <div style={{ flex: 1, height: 4, background: 'rgba(44,36,22,0.05)', borderRadius: 'var(--r-sm)', overflow: 'hidden' }}>
+                      <div style={{ height: '100%', width: `${pct}%`, background: s.color, borderRadius: 'var(--r-sm)' }} />
                     </div>
-                    <span style={{ fontFamily: KK.mono, fontSize: 10, color: '#64748b', minWidth: 26 }}>{pct}%</span>
+                    <span style={{ fontFamily: KK.mono, fontSize: 10, color: 'var(--text3)', minWidth: 26 }}>{pct}%</span>
                   </div>
                 )
               })}
@@ -525,8 +525,8 @@ function OverviewTab({ expenses, sales, period }) {
 
       {expenses.length === 0 && (
         <div className="text-center py-10">
-          <BookOpen size={28} style={{ color: '#475569', margin: '0 auto 8px' }} />
-          <p style={{ color: '#475569', fontSize: 13, fontFamily: KK.serif }}>No expenses recorded yet.<br />Tap "Add Kharcha" to start.</p>
+          <BookOpen size={28} style={{ color: 'var(--text3)', margin: '0 auto 8px' }} />
+          <p style={{ color: 'var(--text3)', fontSize: 13, fontFamily: KK.serif }}>No expenses recorded yet.<br />Tap "Add Kharcha" to start.</p>
         </div>
       )}
     </div>
@@ -561,7 +561,7 @@ function AddTab({ onAdd }) {
     <div className="space-y-4">
       {/* Category grid */}
       <div>
-        <p style={{ fontFamily: KK.serif, fontSize: 11, letterSpacing: 1, textTransform: 'uppercase', color: '#64748b', marginBottom: 10 }}>
+        <p style={{ fontFamily: KK.serif, fontSize: 11, letterSpacing: 1, textTransform: 'uppercase', color: 'var(--text3)', marginBottom: 10 }}>
           Category
         </p>
         <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
@@ -573,13 +573,13 @@ function AddTab({ onAdd }) {
                 style={{
                   background: sel ? `${c.color}18` : KK.card,
                   border: `2px solid ${sel ? c.color : KK.border}`,
-                  borderRadius: 8, padding: '10px 6px',
+                  borderRadius: 'var(--r)', padding: '10px 6px',
                   display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3,
                   cursor: 'pointer', transition: 'all 0.15s',
                 }}>
                 <span style={{ fontSize: 20 }}>{c.icon}</span>
-                <span style={{ fontSize: 11, fontWeight: 600, color: sel ? c.color : '#94a3b8' }}>{c.label}</span>
-                <span style={{ fontSize: 9, color: '#475569', direction: 'rtl' }}>{c.urdu}</span>
+                <span style={{ fontSize: 11, fontWeight: 600, color: sel ? c.color : 'var(--text2)' }}>{c.label}</span>
+                <span style={{ fontSize: 9, color: 'var(--text3)', direction: 'rtl' }}>{c.urdu}</span>
               </button>
             )
           })}
@@ -597,7 +597,7 @@ function AddTab({ onAdd }) {
           </div>
           <div className="grid grid-cols-2 gap-3 mb-3">
             <div>
-              <label style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1, color: '#64748b', display: 'block', marginBottom: 4 }}>Amount (Rs)</label>
+              <label style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1, color: 'var(--text3)', display: 'block', marginBottom: 4 }}>Amount (Rs)</label>
               <input
                 className="input"
                 style={{ fontFamily: KK.mono, fontSize: 18, fontWeight: 700 }}
@@ -607,22 +607,22 @@ function AddTab({ onAdd }) {
                 autoFocus />
             </div>
             <div>
-              <label style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1, color: '#64748b', display: 'block', marginBottom: 4 }}>Date</label>
+              <label style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1, color: 'var(--text3)', display: 'block', marginBottom: 4 }}>Date</label>
               <input className="input" type="date" value={date} onChange={e => setDate(e.target.value)} />
             </div>
           </div>
           <div className="mb-3">
-            <label style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1, color: '#64748b', display: 'block', marginBottom: 4 }}>Note (optional)</label>
+            <label style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1, color: 'var(--text3)', display: 'block', marginBottom: 4 }}>Note (optional)</label>
             <input className="input" value={note} onChange={e => setNote(e.target.value)} placeholder="e.g. LESCO September" />
           </div>
           {/* Live preview */}
           {amount && Number(amount) > 0 && (
             <div style={{
-              padding: '8px 12px', borderRadius: 6, marginBottom: 10,
+              padding: '8px 12px', borderRadius: 'var(--r-sm)', marginBottom: 10,
               background: `${cat.color}0d`, border: `1px solid ${cat.color}30`,
               display: 'flex', justifyContent: 'space-between', alignItems: 'center',
             }}>
-              <span style={{ fontSize: 11, color: '#94a3b8' }}>Recording</span>
+              <span style={{ fontSize: 11, color: 'var(--text2)' }}>Recording</span>
               <span style={{ fontFamily: KK.mono, fontWeight: 700, color: cat.color }}>
                 {cat.icon} {cat.label} — Rs {Number(amount).toLocaleString()}
               </span>
@@ -636,7 +636,7 @@ function AddTab({ onAdd }) {
 
       {/* Quick presets */}
       <KkCard>
-        <p style={{ fontFamily: KK.serif, fontSize: 11, letterSpacing: 1, textTransform: 'uppercase', color: '#64748b', marginBottom: 10 }}>
+        <p style={{ fontFamily: KK.serif, fontSize: 11, letterSpacing: 1, textTransform: 'uppercase', color: 'var(--text3)', marginBottom: 10 }}>
           ⚡ Quick Presets
         </p>
         <div className="grid grid-cols-2 gap-2">
@@ -647,11 +647,11 @@ function AddTab({ onAdd }) {
                 onClick={() => applyPreset(p)}
                 style={{
                   background: KK.card, border: `1px solid ${KK.border2}`,
-                  borderRadius: 7, padding: '10px 12px', textAlign: 'left', cursor: 'pointer',
+                  borderRadius: 'var(--r-sm)', padding: '10px 12px', textAlign: 'left', cursor: 'pointer',
                 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 2 }}>
                   <span style={{ fontSize: 14 }}>{c?.icon}</span>
-                  <span style={{ fontSize: 11, fontWeight: 600, color: '#cbd5e1' }}>{p.label}</span>
+                  <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--text)' }}>{p.label}</span>
                 </div>
                 <span style={{ fontFamily: KK.mono, fontSize: 13, fontWeight: 700, color: c?.color }}>
                   Rs {p.amount.toLocaleString()}
@@ -680,19 +680,19 @@ function LogTab({ expenses, onEdit, onDelete }) {
         <button
           onClick={() => setFilterCat('all')}
           style={{
-            flexShrink: 0, padding: '4px 10px', borderRadius: 6, fontSize: 11, fontWeight: 600,
-            background: filterCat === 'all' ? '#f97316' : KK.card,
-            color: filterCat === 'all' ? '#000' : '#94a3b8',
-            border: `1px solid ${filterCat === 'all' ? '#f97316' : KK.border}`,
+            flexShrink: 0, padding: '4px 10px', borderRadius: 'var(--r-sm)', fontSize: 11, fontWeight: 600,
+            background: filterCat === 'all' ? 'var(--orange)' : KK.card,
+            color: filterCat === 'all' ? '#000' : 'var(--text2)',
+            border: `1px solid ${filterCat === 'all' ? 'var(--orange)' : KK.border}`,
             cursor: 'pointer',
           }}>All</button>
         {CATS.filter(c => expenses.some(e => e.category === c.id)).map(c => (
           <button key={c.id}
             onClick={() => setFilterCat(c.id)}
             style={{
-              flexShrink: 0, padding: '4px 10px', borderRadius: 6, fontSize: 11, fontWeight: 600,
+              flexShrink: 0, padding: '4px 10px', borderRadius: 'var(--r-sm)', fontSize: 11, fontWeight: 600,
               background: filterCat === c.id ? c.color : KK.card,
-              color: filterCat === c.id ? '#000' : '#94a3b8',
+              color: filterCat === c.id ? '#000' : 'var(--text2)',
               border: `1px solid ${filterCat === c.id ? c.color : KK.border}`,
               cursor: 'pointer',
             }}>
@@ -703,10 +703,10 @@ function LogTab({ expenses, onEdit, onDelete }) {
 
       {sorted.length === 0 ? (
         <div className="text-center py-12">
-          <p style={{ fontFamily: KK.serif, fontSize: 13, color: '#475569' }}>No expenses in this period.</p>
+          <p style={{ fontFamily: KK.serif, fontSize: 13, color: 'var(--text3)' }}>No expenses in this period.</p>
         </div>
       ) : (
-        <div style={{ border: `1px solid ${KK.border}`, borderRadius: 10, overflow: 'hidden' }}>
+        <div style={{ border: `1px solid ${KK.border}`, borderRadius: 'var(--r)', overflow: 'hidden' }}>
           {sorted.map((e, i) => {
             const cat = CATS.find(c => c.id === e.category)
             return (
@@ -720,21 +720,21 @@ function LogTab({ expenses, onEdit, onDelete }) {
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div className="flex items-center gap-2 flex-wrap">
                     <span style={{ fontSize: 12, fontWeight: 600, color: cat?.color }}>{cat?.label}</span>
-                    {e.note && <span style={{ fontSize: 11, color: '#64748b' }}>{e.note}</span>}
+                    {e.note && <span style={{ fontSize: 11, color: 'var(--text3)' }}>{e.note}</span>}
                   </div>
-                  <span style={{ fontSize: 10, color: '#475569', fontFamily: KK.mono }}>{e.date}</span>
+                  <span style={{ fontSize: 10, color: 'var(--text3)', fontFamily: KK.mono }}>{e.date}</span>
                 </div>
-                <span style={{ fontFamily: KK.mono, fontWeight: 700, fontSize: 13, color: '#f97316', flexShrink: 0 }}>
+                <span style={{ fontFamily: KK.mono, fontWeight: 700, fontSize: 13, color: 'var(--orange)', flexShrink: 0 }}>
                   Rs {e.amount.toLocaleString()}
                 </span>
                 <div className="flex gap-1 flex-shrink-0">
                   <button onClick={() => setEditEntry(e)}
-                    style={{ padding: 5, borderRadius: 5, background: 'rgba(255,255,255,0.04)', cursor: 'pointer', border: 'none' }}>
-                    <Edit2 size={12} style={{ color: '#64748b' }} />
+                    style={{ padding: 5, borderRadius: 'var(--r-sm)', background: 'rgba(44,36,22,0.04)', cursor: 'pointer', border: 'none' }}>
+                    <Edit2 size={12} style={{ color: 'var(--text3)' }} />
                   </button>
                   <button onClick={() => onDelete(e.id)}
-                    style={{ padding: 5, borderRadius: 5, background: 'rgba(179,69,46,0.06)', cursor: 'pointer', border: 'none' }}>
-                    <Trash2 size={12} style={{ color: '#dc2626' }} />
+                    style={{ padding: 5, borderRadius: 'var(--r-sm)', background: 'rgba(179,69,46,0.06)', cursor: 'pointer', border: 'none' }}>
+                    <Trash2 size={12} style={{ color: 'var(--accent)' }} />
                   </button>
                 </div>
               </div>
@@ -755,11 +755,11 @@ function EditModal({ entry, onSave, onClose }) {
   const [form, setForm] = useState({ ...entry })
   const cat = CATS.find(c => c.id === form.category)
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.82)' }}>
-      <div style={{ background: KK.card2, border: `1px solid ${KK.border}`, borderRadius: 12, padding: 20, width: '100%', maxWidth: 360 }}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.5)' }}>
+      <div style={{ background: KK.card2, border: `1px solid ${KK.border}`, borderRadius: 'var(--r-lg)', padding: 20, width: '100%', maxWidth: 360 }}>
         <div className="flex items-center justify-between mb-4">
-          <span style={{ fontFamily: KK.serif, fontWeight: 700, fontSize: 14, color: '#e2e8f0' }}>Edit Expense</span>
-          <button onClick={onClose}><X size={14} style={{ color: '#64748b' }} /></button>
+          <span style={{ fontFamily: KK.serif, fontWeight: 700, fontSize: 14, color: 'var(--text)' }}>Edit Expense</span>
+          <button onClick={onClose}><X size={14} style={{ color: 'var(--text3)' }} /></button>
         </div>
         <div className="space-y-3">
           <div>
@@ -812,15 +812,15 @@ function CatsTab({ expenses }) {
         <div>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 12 }}>
             <span style={{ fontFamily: KK.mono, fontSize: 20, fontWeight: 700, color: c.color }}>Rs {c.amount.toLocaleString()}</span>
-            <span style={{ fontSize: 11, color: '#64748b' }}>{c.entries.length} entries</span>
+            <span style={{ fontSize: 11, color: 'var(--text3)' }}>{c.entries.length} entries</span>
           </div>
           {c.entries.length === 0
-            ? <p style={{ fontSize: 12, color: '#475569', fontFamily: KK.serif }}>No expenses in this category for this period.</p>
+            ? <p style={{ fontSize: 12, color: 'var(--text3)', fontFamily: KK.serif }}>No expenses in this category for this period.</p>
             : c.entries.map(e => (
-              <div key={e.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', padding: '7px 0', borderBottom: '1px solid #2e2218' }}>
+              <div key={e.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', padding: '7px 0', borderBottom: '1px solid var(--border)' }}>
                 <div>
-                  <span style={{ fontFamily: KK.mono, fontSize: 10, color: '#475569', display: 'block' }}>{e.date}</span>
-                  {e.note && <span style={{ fontSize: 11, color: '#94a3b8' }}>{e.note}</span>}
+                  <span style={{ fontFamily: KK.mono, fontSize: 10, color: 'var(--text3)', display: 'block' }}>{e.date}</span>
+                  {e.note && <span style={{ fontSize: 11, color: 'var(--text2)' }}>{e.note}</span>}
                 </div>
                 <span style={{ fontFamily: KK.mono, fontWeight: 700, fontSize: 12, color: c.color, flexShrink: 0 }}>Rs {e.amount.toLocaleString()}</span>
               </div>
@@ -841,8 +841,8 @@ function CatsTab({ expenses }) {
             <div style={{ position: 'relative', flexShrink: 0 }}>
               <Donut slices={slices} size={140} thick={20} />
               <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-                <span style={{ fontFamily: KK.mono, fontWeight: 700, fontSize: 14, color: '#f97316' }}>{`Rs ${total.toLocaleString()}`}</span>
-                <span style={{ fontSize: 9, color: '#64748b', fontFamily: KK.serif, letterSpacing: 1 }}>TOTAL</span>
+                <span style={{ fontFamily: KK.mono, fontWeight: 700, fontSize: 14, color: 'var(--orange)' }}>{`Rs ${total.toLocaleString()}`}</span>
+                <span style={{ fontSize: 9, color: 'var(--text3)', fontFamily: KK.serif, letterSpacing: 1 }}>TOTAL</span>
               </div>
             </div>
             <div className="flex-1 space-y-2 w-full">
@@ -851,25 +851,25 @@ function CatsTab({ expenses }) {
                 return (
                   <div key={c.id}
                     onClick={() => openCatDrill(c)}
-                    style={{ cursor: 'pointer', borderRadius: 6, padding: '3px 5px', transition: 'background 0.15s' }}
-                    onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.04)' }}
+                    style={{ cursor: 'pointer', borderRadius: 'var(--r-sm)', padding: '3px 5px', transition: 'background 0.15s' }}
+                    onMouseEnter={e => { e.currentTarget.style.background = 'rgba(44,36,22,0.04)' }}
                     onMouseLeave={e => { e.currentTarget.style.background = 'transparent' }}>
                     <div className="flex items-center justify-between mb-1">
-                      <span style={{ fontSize: 11, color: '#cbd5e1' }}>{c.icon} {c.label}</span>
+                      <span style={{ fontSize: 11, color: 'var(--text)' }}>{c.icon} {c.label}</span>
                       <div className="flex items-center gap-2">
                         <span style={{ fontFamily: KK.mono, fontSize: 11, color: c.color }}>Rs {c.amount.toLocaleString()}</span>
-                        <span style={{ fontSize: 10, color: '#475569' }}>{pct}%</span>
-                        <span style={{ fontSize: 9, color: '#334155' }}>→</span>
+                        <span style={{ fontSize: 10, color: 'var(--text3)' }}>{pct}%</span>
+                        <span style={{ fontSize: 9, color: 'var(--text3)' }}>→</span>
                       </div>
                     </div>
-                    <div style={{ height: 4, background: 'rgba(255,255,255,0.05)', borderRadius: 2, overflow: 'hidden' }}>
-                      <div style={{ height: '100%', width: `${(c.amount / maxAmt) * 100}%`, background: c.color, borderRadius: 2, transition: 'width 0.5s' }} />
+                    <div style={{ height: 4, background: 'rgba(44,36,22,0.05)', borderRadius: 'var(--r-sm)', overflow: 'hidden' }}>
+                      <div style={{ height: '100%', width: `${(c.amount / maxAmt) * 100}%`, background: c.color, borderRadius: 'var(--r-sm)', transition: 'width 0.5s' }} />
                     </div>
                   </div>
                 )
               })}
               {byCat.filter(c => c.amount === 0).length > 0 && (
-                <p style={{ fontSize: 10, color: '#334155', marginTop: 6 }}>
+                <p style={{ fontSize: 10, color: 'var(--text3)', marginTop: 6 }}>
                   + {byCat.filter(c => c.amount === 0).map(c => c.label).join(', ')} — Rs 0
                 </p>
               )}
@@ -880,7 +880,7 @@ function CatsTab({ expenses }) {
 
       {slices.length === 0 && (
         <div className="text-center py-12">
-          <p style={{ fontFamily: KK.serif, fontSize: 13, color: '#475569' }}>No expenses recorded in this period.</p>
+          <p style={{ fontFamily: KK.serif, fontSize: 13, color: 'var(--text3)' }}>No expenses recorded in this period.</p>
         </div>
       )}
     </div>
@@ -953,18 +953,18 @@ function InsightsTab({ expenses, sales, period }) {
     insights.push({ icon: '📖', text: 'Add expenses to see smart observations about your business', type: 'info' })
   }
 
-  const colors = { urgent: '#dc2626', warn: '#d97706', good: '#16a34a', info: '#3b82f6' }
+  const colors = { urgent: 'var(--accent)', warn: 'var(--gold)', good: 'var(--forest)', info: 'var(--blue)' }
   const bgColors = { urgent: 'rgba(220,38,38,0.07)', warn: 'rgba(217,119,6,0.07)', good: 'rgba(22,163,74,0.07)', info: 'rgba(59,130,246,0.07)' }
 
   return (
     <div className="space-y-3">
-      <p style={{ fontFamily: KK.serif, fontSize: 11, letterSpacing: 1, textTransform: 'uppercase', color: '#64748b' }}>
+      <p style={{ fontFamily: KK.serif, fontSize: 11, letterSpacing: 1, textTransform: 'uppercase', color: 'var(--text3)' }}>
         Observations — {period === 'today' ? 'Today' : period === 'week' ? 'This Week' : 'This Month'}
       </p>
       {insights.map((ins, i) => (
-        <div key={i} style={{ display: 'flex', gap: 12, padding: '12px 14px', borderRadius: 8, background: bgColors[ins.type], border: `1px solid ${colors[ins.type]}30` }}>
+        <div key={i} style={{ display: 'flex', gap: 12, padding: '12px 14px', borderRadius: 'var(--r)', background: bgColors[ins.type], border: `1px solid ${colors[ins.type]}30` }}>
           <span style={{ fontSize: 16, flexShrink: 0 }}>{ins.icon}</span>
-          <p style={{ fontSize: 12, lineHeight: 1.5, color: '#cbd5e1' }}>{ins.text}</p>
+          <p style={{ fontSize: 12, lineHeight: 1.5, color: 'var(--text)' }}>{ins.text}</p>
         </div>
       ))}
     </div>
@@ -1029,18 +1029,18 @@ function ExportTab({ expenses, sales, period }) {
     <div className="space-y-4">
       {/* Summary card */}
       <KkCard lined>
-        <p style={{ fontFamily: KK.serif, fontSize: 11, letterSpacing: 1, textTransform: 'uppercase', color: '#64748b', marginBottom: 12 }}>
+        <p style={{ fontFamily: KK.serif, fontSize: 11, letterSpacing: 1, textTransform: 'uppercase', color: 'var(--text3)', marginBottom: 12 }}>
           {periodLabel} Summary
         </p>
         {[
-          { l: 'Revenue',     v: revenue,  c: '#60a5fa' },
-          { l: 'COGS',        v: cogs,     c: '#94a3b8' },
-          { l: 'Expenses',    v: expTotal, c: '#f97316' },
-          { l: 'Net Profit',  v: net,      c: net < 0 ? '#dc2626' : '#16a34a' },
-          { l: 'Tax Deductible Expenses', v: dedAmt, c: '#eab308' },
+          { l: 'Revenue',     v: revenue,  c: 'var(--blue)' },
+          { l: 'COGS',        v: cogs,     c: 'var(--text2)' },
+          { l: 'Expenses',    v: expTotal, c: 'var(--orange)' },
+          { l: 'Net Profit',  v: net,      c: net < 0 ? 'var(--accent)' : 'var(--forest)' },
+          { l: 'Tax Deductible Expenses', v: dedAmt, c: 'var(--gold)' },
         ].map(({ l, v, c }) => (
           <div key={l} style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 0', borderBottom: `1px solid ${KK.border}` }}>
-            <span style={{ fontSize: 12, color: '#94a3b8' }}>{l}</span>
+            <span style={{ fontSize: 12, color: 'var(--text2)' }}>{l}</span>
             <span style={{ fontFamily: KK.mono, fontWeight: 700, fontSize: 12, color: c }}>Rs {v.toLocaleString()}</span>
           </div>
         ))}
@@ -1050,19 +1050,19 @@ function ExportTab({ expenses, sales, period }) {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <button
           onClick={() => window.open(`https://wa.me/?text=${encodeURIComponent(waText)}`, '_blank')}
-          style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: '12px 16px', borderRadius: 8, background: 'rgba(37,211,102,0.1)', border: '1px solid rgba(37,211,102,0.25)', color: '#25D366', fontWeight: 600, fontSize: 13, cursor: 'pointer' }}>
+          style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: '12px 16px', borderRadius: 'var(--r)', background: 'rgba(37,211,102,0.1)', border: '1px solid rgba(37,211,102,0.25)', color: '#25D366', fontWeight: 600, fontSize: 13, cursor: 'pointer' }}>
           <MessageCircle size={15} /> Share on WhatsApp
         </button>
         <button onClick={downloadCSV}
-          style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: '12px 16px', borderRadius: 8, background: `rgba(59,130,246,0.1)`, border: '1px solid rgba(59,130,246,0.25)', color: '#60a5fa', fontWeight: 600, fontSize: 13, cursor: 'pointer' }}>
+          style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: '12px 16px', borderRadius: 'var(--r)', background: `rgba(59,130,246,0.1)`, border: '1px solid rgba(59,130,246,0.25)', color: 'var(--blue)', fontWeight: 600, fontSize: 13, cursor: 'pointer' }}>
           <FileDown size={15} /> Download CSV
         </button>
       </div>
 
       {/* Deductible note */}
       {dedAmt > 0 && (
-        <div style={{ padding: '10px 14px', borderRadius: 8, background: 'rgba(234,179,8,0.07)', border: '1px solid rgba(234,179,8,0.2)' }}>
-          <p style={{ fontSize: 11, color: '#ca8a04' }}>
+        <div style={{ padding: '10px 14px', borderRadius: 'var(--r)', background: 'rgba(234,179,8,0.07)', border: '1px solid rgba(234,179,8,0.2)' }}>
+          <p style={{ fontSize: 11, color: 'var(--gold)' }}>
             💡 <strong>Rs {dedAmt.toLocaleString()}</strong> in expenses (Bijli, Kiraya, Tankhwa, Phone, Marmmat) may be tax-deductible. CSV includes a deductibility column.
           </p>
         </div>
@@ -1131,10 +1131,10 @@ export default function KharchaKhata() {
       <div style={{ marginBottom: 20 }}>
         <div className="flex items-start justify-between flex-wrap gap-3">
           <div>
-            <h1 style={{ fontFamily: KK.serif, fontSize: 26, fontWeight: 700, color: '#e2e8f0', letterSpacing: -0.5, marginBottom: 2 }}>
+            <h1 style={{ fontFamily: KK.serif, fontSize: 26, fontWeight: 700, color: 'var(--text)', letterSpacing: -0.5, marginBottom: 2 }}>
               Kharcha Khata
             </h1>
-            <p style={{ fontSize: 11, color: '#475569', letterSpacing: 2, textTransform: 'uppercase', fontFamily: KK.serif }}>
+            <p style={{ fontSize: 11, color: 'var(--text3)', letterSpacing: 2, textTransform: 'uppercase', fontFamily: KK.serif }}>
               کھرچہ کھاتہ — Expense Ledger
             </p>
           </div>
@@ -1143,10 +1143,10 @@ export default function KharchaKhata() {
             {[['today', 'Today'], ['week', 'Week'], ['month', 'Month']].map(([v, l]) => (
               <button key={v} onClick={() => setPeriod(v)}
                 style={{
-                  padding: '6px 14px', borderRadius: 7, fontSize: 12, fontWeight: 600,
-                  background: period === v ? '#f97316' : KK.card2,
-                  color: period === v ? '#000' : '#94a3b8',
-                  border: `1px solid ${period === v ? '#f97316' : KK.border2}`,
+                  padding: '6px 14px', borderRadius: 'var(--r-sm)', fontSize: 12, fontWeight: 600,
+                  background: period === v ? 'var(--orange)' : KK.card2,
+                  color: period === v ? '#000' : 'var(--text2)',
+                  border: `1px solid ${period === v ? 'var(--orange)' : KK.border2}`,
                   cursor: 'pointer', transition: 'all 0.15s',
                 }}>{l}</button>
             ))}
@@ -1167,9 +1167,9 @@ export default function KharchaKhata() {
             <button key={id} onClick={() => setTab(id)}
               style={{
                 display: 'flex', alignItems: 'center', gap: 5,
-                padding: '7px 12px', borderRadius: 8, fontSize: 12, fontWeight: 600, flexShrink: 0,
+                padding: '7px 12px', borderRadius: 'var(--r)', fontSize: 12, fontWeight: 600, flexShrink: 0,
                 background: active ? KK.card2 : 'transparent',
-                color: active ? '#f97316' : '#64748b',
+                color: active ? 'var(--orange)' : 'var(--text3)',
                 border: `1px solid ${active ? KK.border2 : 'transparent'}`,
                 cursor: 'pointer', transition: 'all 0.15s',
               }}>

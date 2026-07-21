@@ -6,4 +6,5 @@ public interface IPurchaseRepository : IRepository<Purchase>
 {
     Task<Purchase?> GetWithItemsAsync(int id);
     Task<IEnumerable<Purchase>> GetBySupplierAsync(int supplierId);
+    Task<IEnumerable<Purchase>> GetAllWithItemsAsync();
 }

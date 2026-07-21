@@ -1,5 +1,6 @@
 using System.Security.Cryptography;
 using System.Text;
+using System.Threading.RateLimiting;
 using KiryanaStore.API;
 using KiryanaStore.API.Auth;
 using KiryanaStore.Application.Interfaces;
@@ -10,6 +11,7 @@ using KiryanaStore.Infrastructure.Data;
 using KiryanaStore.Infrastructure.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Diagnostics;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 
@@ -45,7 +47,7 @@ builder.Services.AddScoped<IPurchaseRepository, PurchaseRepository>();
 builder.Services.AddScoped<ISaleRepository, SaleRepository>();
 builder.Services.AddScoped<IRepository<Supplier>, GenericRepository<Supplier>>();
 builder.Services.AddScoped<IRepository<CreditTransaction>, GenericRepository<CreditTransaction>>();
-builder.Services.AddScoped<IRepository<Expense>, GenericRepository<Expense>>();
+builder.Services.AddScoped<IExpenseRepository, ExpenseRepository>();
 
 // Services
 builder.Services.AddScoped<ICustomerService, CustomerService>();
@@ -84,6 +86,21 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     });
 builder.Services.AddAuthorization();
 
+// Minimal per-IP rate limits on the unauthenticated endpoints that would otherwise allow
+// enumeration/abuse (customer order lookup, self-service store registration).
+builder.Services.AddRateLimiter(options =>
+{
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+
+    options.AddPolicy("orders-lookup", httpContext => RateLimitPartition.GetFixedWindowLimiter(
+        httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+        _ => new FixedWindowRateLimiterOptions { PermitLimit = 10, Window = TimeSpan.FromMinutes(1), QueueLimit = 0 }));
+
+    options.AddPolicy("register-store", httpContext => RateLimitPartition.GetFixedWindowLimiter(
+        httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+        _ => new FixedWindowRateLimiterOptions { PermitLimit = 5, Window = TimeSpan.FromHours(1), QueueLimit = 0 }));
+});
+
 var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>()
     ?? ["http://localhost:5173", "http://localhost:3000"];
 
@@ -95,8 +112,11 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-app.UseSwagger();
-app.UseSwaggerUI();
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
 
 app.UseExceptionHandler(handler =>
 {
@@ -128,6 +148,7 @@ if (hasSpa)
 
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseRateLimiter();
 app.MapControllers();
 
 if (hasSpa)

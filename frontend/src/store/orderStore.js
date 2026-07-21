@@ -73,26 +73,29 @@ export async function getRiders() {
 }
 
 /* ── Customer-side ("my orders") ──────────────────────────────── */
+// customerRef is generated server-side (Orders/Place) and handed back in the response;
+// we just persist whatever the server gave us for later "my orders" lookups.
 export function getCustomerRef() {
-  let ref = localStorage.getItem(CUSTOMER_REF_KEY)
-  if (!ref) {
-    ref = 'c_' + Date.now().toString(36) + Math.random().toString(36).slice(2)
-    localStorage.setItem(CUSTOMER_REF_KEY, ref)
-  }
-  return ref
+  return localStorage.getItem(CUSTOMER_REF_KEY) || ''
+}
+
+function setCustomerRef(ref) {
+  if (ref) localStorage.setItem(CUSTOMER_REF_KEY, ref)
 }
 
 export async function placeOrder({ customerName, address, items }) {
   const sale = await orderApi.place({
     customerName,
     deliveryAddress: address,
-    customerRef: getCustomerRef(),
     items,
   })
+  setCustomerRef(sale?.customerRef)
   emit()
   return sale
 }
 
 export async function getMyOrders() {
-  return orderApi.getMine(getCustomerRef())
+  const ref = getCustomerRef()
+  if (!ref) return []
+  return orderApi.getMine(ref)
 }

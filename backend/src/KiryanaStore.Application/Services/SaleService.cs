@@ -7,9 +7,12 @@ namespace KiryanaStore.Application.Services;
 
 public class SaleService(ISaleRepository saleRepo, IItemRepository itemRepo, ICustomerRepository customerRepo, ICurrentUserContext currentUser) : ISaleService
 {
-    public async Task<IEnumerable<SaleDto>> GetAllAsync()
+    public async Task<IEnumerable<SaleDto>> GetAllAsync(int page = 1, int pageSize = 100)
     {
-        var sales = await saleRepo.GetAllWithItemsAsync();
+        page = page < 1 ? 1 : page;
+        pageSize = Math.Clamp(pageSize, 1, 200);
+
+        var sales = await saleRepo.GetAllWithItemsAsync(page, pageSize);
         return sales.Select(MapToDto);
     }
 
@@ -21,6 +24,11 @@ public class SaleService(ISaleRepository saleRepo, IItemRepository itemRepo, ICu
 
     public async Task<SaleDto> CreateAsync(CreateSaleDto dto)
     {
+        if (dto.Items is null || dto.Items.Count == 0)
+            throw new InvalidOperationException("Sale must have at least one item");
+        if (dto.Items.Any(i => i.ItemId < 1 || i.Quantity < 1))
+            throw new InvalidOperationException("Invalid item or quantity");
+
         var saleItems = new List<SaleItem>();
         decimal totalRevenue = 0, totalCost = 0;
 

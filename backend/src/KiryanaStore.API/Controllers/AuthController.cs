@@ -8,6 +8,7 @@ using KiryanaStore.Domain.Entities;
 using KiryanaStore.Infrastructure.Data;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
@@ -23,6 +24,7 @@ public record LoginResponseDto(string Token, DateTime ExpiresAt, string Role, st
 [AllowAnonymous]
 public class AuthController(AppDbContext db, IOptions<JwtOptions> jwtOptions) : ControllerBase
 {
+    [EnableRateLimiting("register-store")]
     [HttpPost("register-store")]
     public async Task<IActionResult> RegisterStore(RegisterStoreDto dto)
     {
@@ -64,11 +66,10 @@ public class AuthController(AppDbContext db, IOptions<JwtOptions> jwtOptions) : 
         if (string.IsNullOrEmpty(jwt.Secret))
             return StatusCode(500, new { error = "Auth is not configured on the server." });
 
-        var hash = PasswordHasher.Hash(dto.Password);
         var user = await db.Users.IgnoreQueryFilters().Include(u => u.Store)
             .FirstOrDefaultAsync(u => u.Username == dto.Username && u.IsActive);
 
-        if (user is null || user.PasswordHash != hash)
+        if (user is null || !PasswordHasher.Verify(dto.Password, user.PasswordHash))
             return Unauthorized(new { error = "Invalid username or password" });
 
         return Ok(IssueToken(user, user.Store, jwt));

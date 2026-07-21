@@ -7,16 +7,14 @@ namespace KiryanaStore.Application.Services;
 
 public class CustomerService(ICustomerRepository customerRepo, IRepository<CreditTransaction> txRepo, ICurrentUserContext currentUser) : ICustomerService
 {
-    public async Task<IEnumerable<CustomerDto>> GetAllAsync()
+    public async Task<IEnumerable<CustomerDto>> GetAllAsync(int page = 1, int pageSize = 100)
     {
-        var customers = await customerRepo.GetAllAsync();
-        var result = new List<CustomerDto>();
-        foreach (var c in customers)
-        {
-            var balance = await customerRepo.GetBalanceAsync(c.Id);
-            result.Add(MapToDto(c, balance));
-        }
-        return result;
+        page = page < 1 ? 1 : page;
+        pageSize = Math.Clamp(pageSize, 1, 200);
+
+        var customers = (await customerRepo.GetPagedAsync(page, pageSize)).ToList();
+        var balances = await customerRepo.GetBalancesAsync(customers.Select(c => c.Id));
+        return customers.Select(c => MapToDto(c, balances.GetValueOrDefault(c.Id)));
     }
 
     public async Task<CustomerWithTransactionsDto?> GetByIdAsync(int id)
@@ -30,6 +28,8 @@ public class CustomerService(ICustomerRepository customerRepo, IRepository<Credi
 
     public async Task<CustomerDto> CreateAsync(CreateCustomerDto dto)
     {
+        ValidateCustomer(dto.Name, dto.Phone, dto.Address, dto.CreditLimit);
+
         var entity = new Customer
         {
             StoreId = currentUser.StoreId,
@@ -44,6 +44,8 @@ public class CustomerService(ICustomerRepository customerRepo, IRepository<Credi
 
     public async Task<CustomerDto?> UpdateAsync(int id, UpdateCustomerDto dto)
     {
+        ValidateCustomer(dto.Name, dto.Phone, dto.Address, dto.CreditLimit);
+
         var entity = await customerRepo.GetByIdAsync(id);
         if (entity is null) return null;
         entity.Name = dto.Name;
@@ -65,6 +67,13 @@ public class CustomerService(ICustomerRepository customerRepo, IRepository<Credi
 
     public async Task<CreditTransactionDto> AddTransactionAsync(CreateCreditDto dto)
     {
+        if (dto.CustomerId < 1) throw new InvalidOperationException("Invalid customer");
+        if (dto.Amount < 0.01m) throw new InvalidOperationException("Amount must be greater than 0");
+        if (!string.Equals(dto.Type, "Credit", StringComparison.OrdinalIgnoreCase) &&
+            !string.Equals(dto.Type, "Payment", StringComparison.OrdinalIgnoreCase))
+            throw new InvalidOperationException("Type must be 'Credit' or 'Payment'");
+        if (dto.Note is { Length: > 500 }) throw new InvalidOperationException("Note must be at most 500 characters");
+
         var customer = await customerRepo.GetByIdAsync(dto.CustomerId);
         if (customer is null) throw new InvalidOperationException("Customer not found");
 
@@ -95,6 +104,18 @@ public class CustomerService(ICustomerRepository customerRepo, IRepository<Credi
         var customer = await customerRepo.GetWithTransactionsAsync(customerId);
         if (customer is null) return [];
         return customer.CreditTransactions.Select(MapTx);
+    }
+
+    private static void ValidateCustomer(string name, string phone, string address, decimal? creditLimit)
+    {
+        if (string.IsNullOrWhiteSpace(name) || name.Length > 200)
+            throw new InvalidOperationException("Name is required and must be at most 200 characters");
+        if (string.IsNullOrWhiteSpace(phone) || phone.Length > 20)
+            throw new InvalidOperationException("Phone is required and must be at most 20 characters");
+        if (address is { Length: > 300 })
+            throw new InvalidOperationException("Address must be at most 300 characters");
+        if (creditLimit is < 0)
+            throw new InvalidOperationException("Credit limit cannot be negative");
     }
 
     private static CustomerDto MapToDto(Customer c, decimal balance) =>

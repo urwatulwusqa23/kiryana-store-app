@@ -4,7 +4,7 @@ namespace KiryanaStore.Application.Interfaces;
 
 public interface ICustomerService
 {
-    Task<IEnumerable<CustomerDto>> GetAllAsync();
+    Task<IEnumerable<CustomerDto>> GetAllAsync(int page = 1, int pageSize = 100);
     Task<CustomerWithTransactionsDto?> GetByIdAsync(int id);
     Task<CustomerDto> CreateAsync(CreateCustomerDto dto);
     Task<CustomerDto?> UpdateAsync(int id, UpdateCustomerDto dto);

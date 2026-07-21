@@ -14,4 +14,8 @@ public class PurchaseRepository(AppDbContext db) : GenericRepository<Purchase>(d
     public async Task<IEnumerable<Purchase>> GetBySupplierAsync(int supplierId) =>
         await _db.Purchases.Include(p => p.Supplier).Include(p => p.Items).ThenInclude(i => i.Item)
             .Where(p => p.SupplierId == supplierId).ToListAsync();
+
+    public async Task<IEnumerable<Purchase>> GetAllWithItemsAsync() =>
+        await _db.Purchases.Include(p => p.Supplier).Include(p => p.Items).ThenInclude(i => i.Item)
+            .OrderByDescending(p => p.PurchaseDate).ToListAsync();
 }

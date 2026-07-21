@@ -11,7 +11,8 @@ namespace KiryanaStore.API.Controllers;
 public class SalesController(ISaleService service) : ControllerBase
 {
     [HttpGet]
-    public async Task<IActionResult> GetAll() => Ok(await service.GetAllAsync());
+    public async Task<IActionResult> GetAll([FromQuery] int page = 1, [FromQuery] int pageSize = 100) =>
+        Ok(await service.GetAllAsync(page, pageSize));
 
     [HttpGet("dashboard")]
     public async Task<IActionResult> GetDashboard() => Ok(await service.GetDashboardAsync());

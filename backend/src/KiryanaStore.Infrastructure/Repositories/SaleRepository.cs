@@ -14,9 +14,11 @@ public class SaleRepository(AppDbContext db) : GenericRepository<Sale>(db), ISal
         await _db.Sales.Include(s => s.Items).ThenInclude(i => i.Item)
             .FirstOrDefaultAsync(s => s.Id == id);
 
-    public async Task<IEnumerable<Sale>> GetAllWithItemsAsync() =>
+    public async Task<IEnumerable<Sale>> GetAllWithItemsAsync(int page = 1, int pageSize = 100) =>
         await _db.Sales.Include(s => s.Items).ThenInclude(i => i.Item)
-            .OrderByDescending(s => s.SaleDate).ToListAsync();
+            .OrderByDescending(s => s.SaleDate)
+            .Skip((page - 1) * pageSize).Take(pageSize)
+            .ToListAsync();
 
     public async Task<IEnumerable<Sale>> GetRecentWithItemsAsync(int count) =>
         await _db.Sales.Include(s => s.Items).ThenInclude(i => i.Item)

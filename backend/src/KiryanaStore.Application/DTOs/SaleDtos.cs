@@ -1,5 +1,3 @@
-using System.ComponentModel.DataAnnotations;
-
 namespace KiryanaStore.Application.DTOs;
 
 public record SaleItemDto(int ItemId, string ItemName, int Quantity, decimal UnitPrice, decimal UnitCost);
@@ -12,21 +10,17 @@ public record SaleDto(
     DateTime? ConfirmedAt = null, DateTime? PickedUpAt = null, DateTime? OnTheWayAt = null, DateTime? DeliveredAt = null
 );
 
-public record CreateOrderDto(
-    string CustomerName,
-    [property: Required, MinLength(1)] string DeliveryAddress,
-    string? CustomerRef,
-    [property: Required, MinLength(1)] IEnumerable<CreateSaleItemDto> Items);
+// Note: no [Required]/[Range]/[MinLength] attributes here — ASP.NET's DataAnnotations
+// metadata provider throws at request time when a record primary-constructor parameter
+// carries validation attributes (a known ASP.NET Core incompatibility with positional
+// records). Everything below is validated manually in the controllers/services instead.
+public record CreateOrderDto(string CustomerName, string DeliveryAddress, List<CreateSaleItemDto> Items);
 
-public record ConfirmOrderDto([property: Range(1, int.MaxValue)] int RiderId);
+public record ConfirmOrderDto(int RiderId);
 
-public record CreateSaleItemDto(
-    [property: Range(1, int.MaxValue)] int ItemId,
-    [property: Range(1, int.MaxValue)] int Quantity);
+public record CreateSaleItemDto(int ItemId, int Quantity);
 
-public record CreateSaleDto(
-    string CustomerName,
-    [property: Required, MinLength(1)] IEnumerable<CreateSaleItemDto> Items);
+public record CreateSaleDto(string CustomerName, List<CreateSaleItemDto> Items);
 
 public record DashboardDto(
     decimal TodayRevenue, decimal TodayCost, decimal TodayProfit,

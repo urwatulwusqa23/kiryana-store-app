@@ -11,8 +11,9 @@ namespace KiryanaStore.API.Controllers;
 public class ExpensesController(IExpenseService service) : ControllerBase
 {
     [HttpGet]
-    public async Task<IActionResult> GetAll([FromQuery] DateTime? from, [FromQuery] DateTime? to) =>
-        Ok(await service.GetAllAsync(from, to));
+    public async Task<IActionResult> GetAll([FromQuery] DateTime? from, [FromQuery] DateTime? to,
+        [FromQuery] int page = 1, [FromQuery] int pageSize = 100) =>
+        Ok(await service.GetAllAsync(from, to, page, pageSize));
 
     [HttpPost]
     public async Task<IActionResult> Create(CreateExpenseDto dto) => Ok(await service.CreateAsync(dto));

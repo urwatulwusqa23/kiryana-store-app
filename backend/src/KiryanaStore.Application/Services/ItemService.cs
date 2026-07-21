@@ -21,6 +21,8 @@ public class ItemService(IItemRepository itemRepo, ICurrentUserContext currentUs
 
     public async Task<ItemDto> CreateAsync(CreateItemDto dto)
     {
+        ValidateItem(dto.Name, dto.Unit, dto.CostPrice, dto.SellingPrice, dto.Quantity, dto.LowStockThreshold);
+
         var entity = new Item
         {
             StoreId = currentUser.StoreId,
@@ -34,6 +36,8 @@ public class ItemService(IItemRepository itemRepo, ICurrentUserContext currentUs
 
     public async Task<ItemDto?> UpdateAsync(int id, UpdateItemDto dto)
     {
+        ValidateItem(dto.Name, dto.Unit, dto.CostPrice, dto.SellingPrice, dto.Quantity, dto.LowStockThreshold);
+
         var entity = await itemRepo.GetByIdAsync(id);
         if (entity is null) return null;
         entity.Name = dto.Name; entity.Unit = dto.Unit;
@@ -55,6 +59,18 @@ public class ItemService(IItemRepository itemRepo, ICurrentUserContext currentUs
     {
         var items = await itemRepo.GetLowStockItemsAsync();
         return items.Select(MapToDto);
+    }
+
+    private static void ValidateItem(string name, string unit, decimal costPrice, decimal sellingPrice, int quantity, int lowStockThreshold)
+    {
+        if (string.IsNullOrWhiteSpace(name) || name.Length > 200)
+            throw new InvalidOperationException("Name is required and must be at most 200 characters");
+        if (string.IsNullOrWhiteSpace(unit) || unit.Length > 50)
+            throw new InvalidOperationException("Unit is required and must be at most 50 characters");
+        if (costPrice < 0) throw new InvalidOperationException("Cost price cannot be negative");
+        if (sellingPrice < 0) throw new InvalidOperationException("Selling price cannot be negative");
+        if (quantity < 0) throw new InvalidOperationException("Quantity cannot be negative");
+        if (lowStockThreshold < 0) throw new InvalidOperationException("Low stock threshold cannot be negative");
     }
 
     private static ItemDto MapToDto(Item i) =>

@@ -21,6 +21,8 @@ public class SupplierService(IRepository<Supplier> supplierRepo, ICurrentUserCon
 
     public async Task<SupplierDto> CreateAsync(CreateSupplierDto dto)
     {
+        ValidateSupplier(dto.Name, dto.Phone, dto.Company);
+
         var entity = new Supplier { StoreId = currentUser.StoreId, Name = dto.Name, Phone = dto.Phone, Company = dto.Company };
         var created = await supplierRepo.AddAsync(entity);
         return MapToDto(created);
@@ -28,6 +30,8 @@ public class SupplierService(IRepository<Supplier> supplierRepo, ICurrentUserCon
 
     public async Task<SupplierDto?> UpdateAsync(int id, UpdateSupplierDto dto)
     {
+        ValidateSupplier(dto.Name, dto.Phone, dto.Company);
+
         var entity = await supplierRepo.GetByIdAsync(id);
         if (entity is null) return null;
         entity.Name = dto.Name; entity.Phone = dto.Phone; entity.Company = dto.Company;
@@ -41,6 +45,16 @@ public class SupplierService(IRepository<Supplier> supplierRepo, ICurrentUserCon
         if (entity is null) return false;
         await supplierRepo.DeleteAsync(id);
         return true;
+    }
+
+    private static void ValidateSupplier(string name, string phone, string company)
+    {
+        if (string.IsNullOrWhiteSpace(name) || name.Length > 200)
+            throw new InvalidOperationException("Name is required and must be at most 200 characters");
+        if (phone is { Length: > 20 })
+            throw new InvalidOperationException("Phone must be at most 20 characters");
+        if (company is { Length: > 200 })
+            throw new InvalidOperationException("Company must be at most 200 characters");
     }
 
     private static SupplierDto MapToDto(Supplier s) =>
