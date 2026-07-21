@@ -43,7 +43,7 @@ docker compose up --build
 | Frontend   | http://localhost:13000      |
 | Backend API| http://localhost:18080      |
 | Swagger    | http://localhost:18080/swagger |
-| PostgreSQL | localhost:5432              |
+| PostgreSQL | localhost:15432             |
 
 Demo data is auto-seeded on first run.
 
@@ -55,7 +55,7 @@ Demo data is auto-seeded on first run.
 
 1. Open `backend/KiryanaStore.sln` in Visual Studio 2022
 2. Start **PostgreSQL** (easiest: use the repo’s Docker Compose and only run the `postgres` service, or install Postgres locally and match `appsettings.Development.json`).
-3. Check `appsettings.Development.json` / `appsettings.json` for `ConnectionStrings:DefaultConnection` (defaults to `localhost:5432`, user `kiryana`, database `kiryanadb`).
+3. Check `appsettings.Development.json` / `appsettings.json` for `ConnectionStrings:DefaultConnection` (defaults to `localhost:5432` for a direct local Postgres install; use `localhost:15432` when connecting through this repo's Docker Compose mapping), user `kiryana`, database `kiryanadb`.
 4. Press **F5** to run — EF migrations + seeding run on startup
 5. Swagger: `https://localhost:<port>/swagger`
 

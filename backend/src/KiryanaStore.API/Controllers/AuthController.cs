@@ -59,6 +59,7 @@ public class AuthController(AppDbContext db, IOptions<JwtOptions> jwtOptions) : 
         return Ok(IssueToken(user, store, jwt));
     }
 
+    [EnableRateLimiting("auth-login")]
     [HttpPost("login")]
     public async Task<IActionResult> Login(LoginDto dto)
     {

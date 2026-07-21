@@ -55,6 +55,7 @@ public class OrdersController(AppDbContext db, ICurrentUserContext currentUser) 
     // Customer Portal has no login — the customer picks a nearby store first (see
     // StoresController) and orders are placed against that store's id.
     [AllowAnonymous]
+    [EnableRateLimiting("orders-place")]
     [HttpPost]
     public async Task<IActionResult> Place(CreateOrderDto dto)
     {

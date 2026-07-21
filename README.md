@@ -167,7 +167,7 @@ The Customer Portal needs no account — pick a store and shop.
 - Passwords are hashed with salted PBKDF2 (100k iterations) and verified with a constant-time comparison.
 - Multi-tenancy is enforced by a global EF Core query filter (`StoreId == currentUser.StoreId`) on every tenant-scoped entity — no controller can accidentally leak another store's data.
 - The two anonymous Customer Portal endpoints (order placement + "my orders" lookup) use a server-generated, cryptographically random lookup reference (never client-supplied) and are rate-limited per IP.
-- Self-service store registration (`POST /api/auth/register-store`) is rate-limited per IP.
+- Self-service store registration (`POST /api/auth/register-store`) and login (`POST /api/auth/login`) are rate-limited per IP.
 - Swagger UI is only served in the Development environment.
 
 **Production config** (see `render.yaml`): `Jwt__Secret`, `Cors__AllowedOrigins__*`, and the Postgres connection string must be set via environment variables. Use a long, random `Jwt__Secret` — do not ship the local dev fallback.

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { CheckCircle, Clock, ChevronRight, MapPin, Package } from 'lucide-react'
 import { fetchOrders, advanceOrder, STEPS } from '../store/orderStore'
+import { auth } from '../services/api'
 import toast from 'react-hot-toast'
 import GroceryBackdrop from '../components/GroceryBackdrop'
 
@@ -14,7 +15,6 @@ function toOrderState(sale) {
 }
 
 const YELLOW = 'var(--gold)'
-const RIDER  = { name: 'Asif Khan', area: 'Gulberg III, Lahore' }
 
 const STATUS_META = {
   confirmed:  { color: 'var(--blue)', bg: 'rgba(92,122,138,0.12)', label: 'Confirmed'   },
@@ -69,6 +69,8 @@ export default function RiderPortal({ onSwitch }) {
     { key: 'active',    label: '🛵 Active Deliveries', badge: active.length    },
     { key: 'delivered', label: '✅ Delivered',          badge: delivered.length },
   ]
+  const riderName = auth.getProfile()?.fullName || 'Rider'
+  const riderStore = auth.getProfile()?.storeName || 'Assigned Store'
 
   return (
     <div className="min-h-screen relative" style={{ background: 'var(--bg)' }}>
@@ -84,13 +86,13 @@ export default function RiderPortal({ onSwitch }) {
             </div>
             <div>
               <p className="font-bold text-sm leading-tight" style={{ color: 'var(--text)' }}>
-                {RIDER.name}
+                {riderName}
               </p>
               <div className="flex items-center gap-1.5">
                 <span className="w-1.5 h-1.5 rounded-full animate-pulse"
                   style={{ background: 'var(--accent)' }} />
                 <p className="text-xs" style={{ color: 'var(--text3)' }}>
-                  Rider · Online · {RIDER.area}
+                  Rider · Online · {riderStore}
                 </p>
               </div>
             </div>

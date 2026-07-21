@@ -5,7 +5,7 @@ import { authApi, auth } from '../services/api'
 import GroceryBackdrop from '../components/GroceryBackdrop'
 import GroceryIllustration from '../components/GroceryIllustration'
 
-export default function Login({ onSuccess, onCreateStore, requiredRole, kicker = 'Staff Sign-in', title = 'Welcome back', subtitle = 'Sign in to manage your store' }) {
+export default function Login({ onSuccess, onCreateStore, requiredRole, requiredRoles, kicker = 'Staff Sign-in', title = 'Welcome back', subtitle = 'Sign in to manage your store' }) {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
@@ -15,8 +15,12 @@ export default function Login({ onSuccess, onCreateStore, requiredRole, kicker =
     setLoading(true)
     try {
       const { token, role, storeName, fullName } = await authApi.login(username, password)
-      if (requiredRole && role !== requiredRole) {
-        toast.error(`This account is not a ${requiredRole.toLowerCase()} account`)
+      const allowedRoles = requiredRoles && requiredRoles.length > 0
+        ? requiredRoles
+        : (requiredRole ? [requiredRole] : null)
+      if (allowedRoles && !allowedRoles.includes(role)) {
+        const expected = allowedRoles.map(r => r.toLowerCase()).join(' or ')
+        toast.error(`This account is not an ${expected} account`)
         return
       }
       auth.setToken(token)

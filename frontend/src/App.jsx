@@ -323,6 +323,7 @@ export default function App() {
   const [portal, setPortal] = useState(() => localStorage.getItem('k_portal') || null)
   const [authed, setAuthed] = useState(() => !!auth.getToken())
   const [authMode, setAuthMode] = useState('login') // 'login' | 'signup'
+  const ownerRoleAllowed = ['Owner', 'Employee'].includes(auth.getRole() || '')
 
   const selectPortal = p => { localStorage.setItem('k_portal', p); setPortal(p) }
   const switchPortal = () => { localStorage.removeItem('k_portal'); auth.clearToken(); setAuthed(false); setPortal(null); setAuthMode('login') }
@@ -375,10 +376,14 @@ export default function App() {
     </>
   )
 
-  if (!authed) return (
+  if (!authed || !ownerRoleAllowed) return (
     <>
       <Toaster position="top-right" toastOptions={TOAST_OPTS} />
-      <Login onSuccess={() => setAuthed(true)} onCreateStore={() => setAuthMode('signup')} />
+      <Login
+        onSuccess={() => setAuthed(true)}
+        onCreateStore={() => setAuthMode('signup')}
+        requiredRoles={['Owner', 'Employee']}
+      />
     </>
   )
 
