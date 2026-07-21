@@ -14,7 +14,7 @@ public record SaleDto(
 // metadata provider throws at request time when a record primary-constructor parameter
 // carries validation attributes (a known ASP.NET Core incompatibility with positional
 // records). Everything below is validated manually in the controllers/services instead.
-public record CreateOrderDto(string CustomerName, string DeliveryAddress, List<CreateSaleItemDto> Items);
+public record CreateOrderDto(int StoreId, string CustomerName, string DeliveryAddress, List<CreateSaleItemDto> Items);
 
 public record ConfirmOrderDto(int RiderId);
 

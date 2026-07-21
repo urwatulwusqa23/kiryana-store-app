@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { ArrowLeft, ArrowRight } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { authApi, auth } from '../services/api'
+import GroceryBackdrop from '../components/GroceryBackdrop'
 
 export default function Signup({ onSuccess, onBack }) {
   const [form, setForm] = useState({ storeName: '', city: '', phone: '', ownerName: '', username: '', password: '' })
@@ -26,8 +27,9 @@ export default function Signup({ onSuccess, onBack }) {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-6" style={{ background: 'var(--bg)' }}>
-      <div className="w-full max-w-sm">
+    <div className="min-h-screen flex items-center justify-center p-6 relative overflow-hidden" style={{ background: 'var(--bg)' }}>
+      <GroceryBackdrop />
+      <div className="w-full max-w-sm relative z-10">
         <div className="text-center mb-8">
           <p className="kicker mb-2">New Registration</p>
           <h1 className="serif" style={{ fontSize: 28, fontWeight: 900, color: 'var(--text)' }}>Open your ledger</h1>

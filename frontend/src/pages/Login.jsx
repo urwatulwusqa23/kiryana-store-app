@@ -5,7 +5,7 @@ import { authApi, auth } from '../services/api'
 import GroceryBackdrop from '../components/GroceryBackdrop'
 import GroceryIllustration from '../components/GroceryIllustration'
 
-export default function Login({ onSuccess, onCreateStore }) {
+export default function Login({ onSuccess, onCreateStore, requiredRole, kicker = 'Staff Sign-in', title = 'Welcome back', subtitle = 'Sign in to manage your store' }) {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
@@ -15,6 +15,10 @@ export default function Login({ onSuccess, onCreateStore }) {
     setLoading(true)
     try {
       const { token, role, storeName, fullName } = await authApi.login(username, password)
+      if (requiredRole && role !== requiredRole) {
+        toast.error(`This account is not a ${requiredRole.toLowerCase()} account`)
+        return
+      }
       auth.setToken(token)
       auth.setProfile({ role, storeName, fullName })
       onSuccess()
@@ -55,9 +59,9 @@ export default function Login({ onSuccess, onCreateStore }) {
         {/* Form side */}
         <div className="p-8 sm:p-12 flex flex-col justify-center" style={{ background: 'var(--surface)' }}>
           <div className="mb-8">
-            <p className="kicker mb-2">Staff Sign-in</p>
-            <h1 className="serif" style={{ fontSize: 28, fontWeight: 900, color: 'var(--text)' }}>Welcome back</h1>
-            <p className="text-sm mt-1.5" style={{ color: 'var(--text3)' }}>Sign in to manage your store</p>
+            <p className="kicker mb-2">{kicker}</p>
+            <h1 className="serif" style={{ fontSize: 28, fontWeight: 900, color: 'var(--text)' }}>{title}</h1>
+            <p className="text-sm mt-1.5" style={{ color: 'var(--text3)' }}>{subtitle}</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-5">

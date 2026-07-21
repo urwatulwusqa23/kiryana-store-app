@@ -1,6 +1,7 @@
 using KiryanaStore.Application.Auth;
 using KiryanaStore.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
+using System.Linq;
 
 namespace KiryanaStore.Infrastructure.Data;
 
@@ -14,8 +15,37 @@ public static class DataSeeder
 
         var now = DateTime.UtcNow;
 
-        var store = new Store { Name = "Ahmed General Store", Slug = "ahmed-general-store", City = "Lahore", Address = "Gulberg III, Lahore", Phone = "03XX-1234567" };
+        var store = new Store { Name = "Ahmed General Store", Slug = "ahmed-general-store", City = "Lahore", Address = "Gulberg III, Lahore", Phone = "03XX-1234567", Latitude = 31.5100, Longitude = 74.3436 };
         db.Stores.Add(store);
+
+        // Extra nearby stores purely for the Customer Portal's location-based discovery
+        // demo — each just needs its own stock, not a full owner/staff/analytics setup.
+        var nearbyStores = new[]
+        {
+            new Store { Name = "Malik Superstore", Slug = "malik-superstore", City = "Lahore", Address = "DHA Phase 5, Lahore", Phone = "0300-5551234", Latitude = 31.4697, Longitude = 74.4046 },
+            new Store { Name = "Fresh Mart",        Slug = "fresh-mart",        City = "Lahore", Address = "Johar Town, Lahore",  Phone = "0300-5555678", Latitude = 31.4697, Longitude = 74.2728 },
+            new Store { Name = "City Grocers",      Slug = "city-grocers",      City = "Lahore", Address = "Model Town, Lahore",  Phone = "0300-5559012", Latitude = 31.4805, Longitude = 74.3247 },
+        };
+        db.Stores.AddRange(nearbyStores);
+        await db.SaveChangesAsync();
+
+        var nearbyStock = new (string Name, string Unit, decimal Cost, decimal Price, int Qty)[]
+        {
+            ("Basmati Rice (1kg)", "kg", 120, 150, 40),
+            ("Cooking Oil (1L)", "litre", 250, 300, 25),
+            ("Sugar (1kg)", "kg", 80, 100, 30),
+            ("Tea Bags (100pcs)", "box", 180, 220, 15),
+            ("Milk (1L Tetra Pack)", "litre", 190, 220, 20),
+            ("Eggs (Dozen)", "dozen", 280, 330, 12),
+            ("Bread (Large)", "pack", 90, 120, 18),
+            ("Biscuits (Family Pack)", "pack", 95, 130, 22),
+        };
+        foreach (var s in nearbyStores)
+            db.Items.AddRange(nearbyStock.Select(x => new Item
+            {
+                StoreId = s.Id, Name = x.Name, Unit = x.Unit,
+                CostPrice = x.Cost, SellingPrice = x.Price, Quantity = x.Qty, LowStockThreshold = 8
+            }));
         await db.SaveChangesAsync();
 
         var users = new[]

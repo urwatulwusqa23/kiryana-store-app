@@ -2,12 +2,17 @@ import { useEffect, useState } from 'react'
 import {
   ShoppingBag, ShoppingCart, Plus, Minus,
   ArrowLeft, Search, Package, MapPin, MessageCircle, X, ChevronRight,
+  Navigation, Store as StoreIcon, LocateFixed,
 } from 'lucide-react'
-import { itemApi } from '../services/api'
+import { storeApi } from '../services/api'
 import {
   placeOrder, getMyOrders, STEPS,
 } from '../store/orderStore'
 import toast from 'react-hot-toast'
+import GroceryBackdrop from '../components/GroceryBackdrop'
+import { categorize } from '../utils/productCategory'
+
+const SELECTED_STORE_KEY = 'k_selected_store'
 
 const STATUS_KEY = { Pending: 'pending', Confirmed: 'confirmed', PickedUp: 'picked_up', OnTheWay: 'on_the_way', Delivered: 'delivered' }
 function toOrderState(sale) {
@@ -19,7 +24,6 @@ function toOrderState(sale) {
 }
 
 const ORANGE = 'var(--accent)'
-const STORE  = { name: 'Ahmed General Store', area: 'Gulberg III, Lahore', phone: '03XX-1234567' }
 
 const STATUS_META = {
   pending:    { bg: 'rgba(201,154,63,0.12)',  color: 'var(--gold)', label: '⏳ Waiting'     },
@@ -33,8 +37,23 @@ const STATUS_META = {
 export default function CustomerPortal({ onSwitch }) {
   const [tab, setTab]           = useState('browse')
   const [trackId, setTrackId]   = useState(null) // sale id to track
+  const [store, setStore]       = useState(() => {
+    try { return JSON.parse(localStorage.getItem(SELECTED_STORE_KEY) || 'null') } catch { return null }
+  })
 
   function goTrack(saleId) { setTrackId(saleId); setTab('track') }
+
+  function selectStore(s) {
+    localStorage.setItem(SELECTED_STORE_KEY, JSON.stringify(s))
+    setStore(s)
+  }
+
+  function changeStore() {
+    localStorage.removeItem(SELECTED_STORE_KEY)
+    setStore(null)
+  }
+
+  if (!store) return <StorePicker onSelect={selectStore} onSwitch={onSwitch} />
 
   const TABS = [
     { key: 'browse', label: '🛒 Browse Store' },
@@ -43,31 +62,32 @@ export default function CustomerPortal({ onSwitch }) {
   ]
 
   return (
-    <div className="min-h-screen" style={{ background: 'var(--bg)' }}>
+    <div className="min-h-screen relative" style={{ background: 'var(--bg)' }}>
+      <GroceryBackdrop variant="subtle" fixed />
       {/* Sticky header */}
       <div className="sticky top-0 z-20"
         style={{ background: 'var(--surface)', borderBottom: '1px solid var(--border)' }}>
         <div className="max-w-lg mx-auto px-4 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-3">
+          <button onClick={changeStore} className="flex items-center gap-3 text-left">
             <div className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 text-sm"
               style={{ background: `${ORANGE}1a`, border: `1px solid ${ORANGE}30` }}>
               🛒
             </div>
             <div>
               <p className="font-bold text-sm leading-tight" style={{ color: 'var(--text)' }}>
-                {STORE.name}
+                {store.name}
               </p>
               <div className="flex items-center gap-1.5">
                 <span className="w-1.5 h-1.5 rounded-full animate-pulse"
                   style={{ background: 'var(--accent)' }} />
                 <p className="text-xs" style={{ color: 'var(--text3)' }}>
-                  {STORE.area} · Open Now
+                  {store.address}{store.distanceKm != null ? ` · ${store.distanceKm.toFixed(1)} km away` : ''} · Change store
                 </p>
               </div>
             </div>
-          </div>
+          </button>
           <button onClick={onSwitch}
-            className="text-xs font-semibold px-3 py-1.5 rounded-lg"
+            className="text-xs font-semibold px-3 py-1.5 rounded-lg flex-shrink-0"
             style={{ color: 'var(--text3)', background: 'var(--surface2)', border: '1px solid var(--border)' }}>
             Switch Portal
           </button>
@@ -87,7 +107,7 @@ export default function CustomerPortal({ onSwitch }) {
       </div>
 
       <div className="max-w-lg mx-auto pb-28">
-        {tab === 'browse' && <BrowseStore onOrderPlaced={goTrack} />}
+        {tab === 'browse' && <BrowseStore store={store} onOrderPlaced={goTrack} />}
         {tab === 'orders' && <MyOrders   onTrack={goTrack} />}
         {tab === 'track'  && <TrackOrder saleId={trackId} />}
       </div>
@@ -95,8 +115,118 @@ export default function CustomerPortal({ onSwitch }) {
   )
 }
 
+/* ─── Store Picker (location → nearby stores) ───────────────────── */
+function StorePicker({ onSelect, onSwitch }) {
+  const [status, setStatus]   = useState('idle') // idle | locating | done | denied
+  const [stores, setStores]   = useState([])
+  const [loading, setLoading] = useState(false)
+
+  async function loadStores(lat, lng) {
+    setLoading(true)
+    try {
+      setStores(await storeApi.getNearby(lat, lng))
+      setStatus('done')
+    } catch (e) {
+      toast.error(e.message || 'Could not load stores')
+      setStatus('denied')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  function useMyLocation() {
+    if (!navigator.geolocation) { loadStores(); return }
+    setStatus('locating')
+    navigator.geolocation.getCurrentPosition(
+      pos => loadStores(pos.coords.latitude, pos.coords.longitude),
+      () => { toast.error('Location permission denied — showing all stores'); loadStores() },
+      { timeout: 8000 }
+    )
+  }
+
+  function browseAll() { loadStores() }
+
+  return (
+    <div className="min-h-screen relative flex flex-col items-center p-6" style={{ background: 'var(--bg)' }}>
+      <GroceryBackdrop />
+      <div className="w-full max-w-sm relative z-10 pt-10">
+        <div className="text-center mb-8">
+          <div className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4"
+            style={{ background: `${ORANGE}1a`, border: `1px solid ${ORANGE}30` }}>
+            <StoreIcon size={24} style={{ color: ORANGE }} />
+          </div>
+          <h1 className="serif" style={{ fontSize: 26, fontWeight: 900, color: 'var(--text)' }}>Find your kiryana</h1>
+          <p className="text-sm mt-1.5" style={{ color: 'var(--text3)' }}>
+            Share your location to see nearby stores and their stock
+          </p>
+        </div>
+
+        {status === 'idle' && (
+          <div className="space-y-3">
+            <button onClick={useMyLocation}
+              className="w-full py-3.5 rounded-xl font-bold text-sm flex items-center justify-center gap-2"
+              style={{ background: ORANGE, color: '#faf4e6' }}>
+              <LocateFixed size={16} /> Use My Location
+            </button>
+            <button onClick={browseAll}
+              className="w-full py-3 rounded-xl font-semibold text-sm"
+              style={{ color: 'var(--text2)', background: 'var(--surface)', border: '1px solid var(--border)' }}>
+              Browse All Stores
+            </button>
+          </div>
+        )}
+
+        {status === 'locating' && (
+          <div className="flex flex-col items-center py-10 gap-3">
+            <Navigation size={22} className="animate-pulse" style={{ color: ORANGE }} />
+            <p className="text-sm" style={{ color: 'var(--text3)' }}>Finding stores near you…</p>
+          </div>
+        )}
+
+        {status === 'done' && (
+          <div className="space-y-2.5">
+            {loading ? (
+              <div className="flex justify-center py-10">
+                <div className="w-6 h-6 rounded-full border-2 animate-spin" style={{ borderColor: 'var(--border2)', borderTopColor: ORANGE }} />
+              </div>
+            ) : stores.length === 0 ? (
+              <p className="text-center text-sm py-10" style={{ color: 'var(--text3)' }}>No stores found</p>
+            ) : stores.map(s => (
+              <button key={s.id} onClick={() => onSelect(s)}
+                className="w-full card flex items-center gap-3 text-left"
+                onMouseEnter={e => e.currentTarget.style.borderColor = `${ORANGE}60`}
+                onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--border)'}>
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+                  style={{ background: `${ORANGE}1a` }}>
+                  <StoreIcon size={18} style={{ color: ORANGE }} />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="font-bold text-sm truncate" style={{ color: 'var(--text)' }}>{s.name}</p>
+                  <p className="text-xs truncate" style={{ color: 'var(--text3)' }}>{s.address}</p>
+                </div>
+                {s.distanceKm != null && (
+                  <span className="text-xs font-bold px-2 py-1 rounded-lg flex-shrink-0"
+                    style={{ color: ORANGE, background: `${ORANGE}18` }}>
+                    {s.distanceKm.toFixed(1)} km
+                  </span>
+                )}
+              </button>
+            ))}
+          </div>
+        )}
+
+        <button onClick={onSwitch}
+          className="w-full text-center text-xs font-semibold mt-6"
+          style={{ color: 'var(--text3)' }}>
+          Switch Portal
+        </button>
+      </div>
+    </div>
+  )
+}
+
 /* ─── Browse Store ───────────────────────────────────────────── */
-function BrowseStore({ onOrderPlaced }) {
+function BrowseStore({ store, onOrderPlaced }) {
   const [items,        setItems]        = useState([])
   const [loading,      setLoading]      = useState(true)
   const [cart,         setCart]         = useState({})
@@ -106,13 +236,14 @@ function BrowseStore({ onOrderPlaced }) {
   const [submitting,   setSubmitting]   = useState(false)
 
   useEffect(() => {
-    itemApi.getAll()
+    storeApi.getItems(store.id)
       .then(d => setItems(d.filter(i => i.quantity > 0)))
       .catch(e => toast.error(e.message))
       .finally(() => setLoading(false))
-  }, [])
+  }, [store.id])
 
   const [search, setSearch] = useState('')
+  const [activeCat, setActiveCat] = useState(null)
 
   const cartItems = Object.entries(cart)
     .map(([id, qty]) => ({ item: items.find(i => i.id === Number(id)), qty }))
@@ -138,6 +269,7 @@ function BrowseStore({ onOrderPlaced }) {
     try {
       const name = customerName.trim() || 'Online Customer'
       const sale = await placeOrder({
+        storeId: store.id,
         customerName: name,
         address: address.trim(),
         items: cartItems.map(({ item, qty }) => ({ itemId: item.id, quantity: qty })),
@@ -198,38 +330,44 @@ function BrowseStore({ onOrderPlaced }) {
       ) : (
         <>
           <div className="card divide-y" style={{ '--tw-divide-opacity': 1 }}>
-            {cartItems.map(({ item, qty }) => (
-              <div key={item.id}
-                className="flex items-center gap-3 py-3 first:pt-0 last:pb-0"
-                style={{ borderColor: 'var(--border)' }}>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold truncate" style={{ color: 'var(--text)' }}>
-                    {item.name}
-                  </p>
-                  <p className="text-xs" style={{ color: 'var(--text3)' }}>
-                    Rs. {item.sellingPrice} / {item.unit}
+            {cartItems.map(({ item, qty }) => {
+              const { icon: Icon, color, bg } = categorize(item.name)
+              return (
+                <div key={item.id}
+                  className="flex items-center gap-3 py-3 first:pt-0 last:pb-0"
+                  style={{ borderColor: 'var(--border)' }}>
+                  <div className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: bg }}>
+                    <Icon size={16} style={{ color }} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold truncate" style={{ color: 'var(--text)' }}>
+                      {item.name}
+                    </p>
+                    <p className="text-xs" style={{ color: 'var(--text3)' }}>
+                      Rs. {item.sellingPrice} / {item.unit}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button onClick={() => dec(item.id)}
+                      className="w-7 h-7 rounded-full flex items-center justify-center transition-transform active:scale-90"
+                      style={{ background: `${color}1a`, color }}>
+                      <Minus size={11} />
+                    </button>
+                    <span className="w-6 text-center font-bold text-sm" style={{ color: 'var(--text)' }}>
+                      {qty}
+                    </span>
+                    <button onClick={() => add(item)} disabled={qty >= item.quantity}
+                      className="w-7 h-7 rounded-full flex items-center justify-center disabled:opacity-40 transition-transform active:scale-90"
+                      style={{ background: `${color}1a`, color }}>
+                      <Plus size={11} />
+                    </button>
+                  </div>
+                  <p className="text-sm font-bold w-20 text-right" style={{ color: 'var(--text)' }}>
+                    Rs. {(item.sellingPrice * qty).toLocaleString()}
                   </p>
                 </div>
-                <div className="flex items-center gap-2">
-                  <button onClick={() => dec(item.id)}
-                    className="w-7 h-7 rounded-full flex items-center justify-center"
-                    style={{ background: `${ORANGE}1a`, color: ORANGE }}>
-                    <Minus size={11} />
-                  </button>
-                  <span className="w-6 text-center font-bold text-sm" style={{ color: 'var(--text)' }}>
-                    {qty}
-                  </span>
-                  <button onClick={() => add(item)} disabled={qty >= item.quantity}
-                    className="w-7 h-7 rounded-full flex items-center justify-center disabled:opacity-40"
-                    style={{ background: `${ORANGE}1a`, color: ORANGE }}>
-                    <Plus size={11} />
-                  </button>
-                </div>
-                <p className="text-sm font-bold w-20 text-right" style={{ color: 'var(--text)' }}>
-                  Rs. {(item.sellingPrice * qty).toLocaleString()}
-                </p>
-              </div>
-            ))}
+              )
+            })}
           </div>
 
           <div className="card">
@@ -253,8 +391,12 @@ function BrowseStore({ onOrderPlaced }) {
   )
 
   /* ── Shop grid ── */
-  const filtered = items.filter(i =>
-    i.name.toLowerCase().includes(search.toLowerCase())
+  const categorized = items.map(i => ({ ...i, cat: categorize(i.name) }))
+  const presentCats = [...new Map(categorized.map(i => [i.cat.key, i.cat])).values()]
+
+  const filtered = categorized.filter(i =>
+    i.name.toLowerCase().includes(search.toLowerCase()) &&
+    (!activeCat || i.cat.key === activeCat)
   )
 
   return (
@@ -267,7 +409,7 @@ function BrowseStore({ onOrderPlaced }) {
           <p className="text-xs font-semibold" style={{ color: 'var(--accent)' }}>
             Need help? WhatsApp us!
           </p>
-          <p className="text-xs" style={{ color: 'var(--text3)' }}>{STORE.phone}</p>
+          <p className="text-xs" style={{ color: 'var(--text3)' }}>{store.phone}</p>
         </div>
       </div>
 
@@ -286,6 +428,36 @@ function BrowseStore({ onOrderPlaced }) {
         )}
       </div>
 
+      {/* Category chips */}
+      {presentCats.length > 1 && (
+        <div className="flex gap-2 overflow-x-auto pb-1" style={{ scrollbarWidth: 'none' }}>
+          <button onClick={() => setActiveCat(null)}
+            className="flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-bold transition-all"
+            style={{
+              background: !activeCat ? ORANGE : 'var(--surface)',
+              color: !activeCat ? '#faf4e6' : 'var(--text2)',
+              border: `1px solid ${!activeCat ? ORANGE : 'var(--border)'}`,
+            }}>
+            🧺 All
+          </button>
+          {presentCats.map(c => {
+            const Icon = c.icon
+            const active = activeCat === c.key
+            return (
+              <button key={c.key} onClick={() => setActiveCat(active ? null : c.key)}
+                className="flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-bold flex items-center gap-1.5 transition-all"
+                style={{
+                  background: active ? c.color : 'var(--surface)',
+                  color: active ? '#fff' : c.color,
+                  border: `1px solid ${active ? c.color : c.color + '40'}`,
+                }}>
+                <Icon size={12} /> {c.key.charAt(0).toUpperCase() + c.key.slice(1)}
+              </button>
+            )
+          })}
+        </div>
+      )}
+
       {/* Product grid */}
       {filtered.length === 0 ? (
         <div className="text-center py-12" style={{ color: 'var(--text3)' }}>
@@ -296,15 +468,18 @@ function BrowseStore({ onOrderPlaced }) {
         <div className="grid grid-cols-2 gap-3">
           {filtered.map(item => {
             const qty = cart[item.id] || 0
+            const { icon: Icon, color, bg } = item.cat
             return (
-              <div key={item.id} className="rounded-xl p-3 transition-all"
+              <div key={item.id} className="rounded-xl p-3 transition-all duration-200"
                 style={{
                   background: 'var(--surface)',
-                  border: `1.5px solid ${qty > 0 ? ORANGE + '60' : 'var(--border)'}`,
+                  border: `1.5px solid ${qty > 0 ? color + '70' : 'var(--border)'}`,
+                  boxShadow: qty > 0 ? `0 6px 16px ${color}25` : 'var(--shadow)',
+                  transform: qty > 0 ? 'translateY(-2px)' : 'none',
                 }}>
                 <div className="aspect-square rounded-lg mb-2.5 flex items-center justify-center"
-                  style={{ background: `${ORANGE}0d` }}>
-                  <Package size={26} style={{ color: ORANGE + '60' }} />
+                  style={{ background: `linear-gradient(155deg, ${bg}, ${bg}aa)` }}>
+                  <Icon size={30} style={{ color }} strokeWidth={1.75} />
                 </div>
                 <p className="text-sm font-semibold truncate" style={{ color: 'var(--text)' }}>
                   {item.name}
@@ -312,27 +487,27 @@ function BrowseStore({ onOrderPlaced }) {
                 <p className="text-xs" style={{ color: 'var(--text3)' }}>
                   {item.unit} · {item.quantity} left
                 </p>
-                <p className="text-base font-extrabold mt-1.5" style={{ color: ORANGE }}>
+                <p className="text-base font-extrabold mt-1.5" style={{ color }}>
                   Rs. {item.sellingPrice.toLocaleString()}
                 </p>
                 <div className="mt-2">
                   {qty === 0 ? (
                     <button onClick={() => add(item)}
-                      className="w-full py-1.5 rounded-lg text-xs font-bold text-black flex items-center justify-center gap-1"
-                      style={{ background: ORANGE }}>
+                      className="w-full py-1.5 rounded-lg text-xs font-bold flex items-center justify-center gap-1 transition-transform active:scale-95"
+                      style={{ background: color, color: '#fff' }}>
                       <Plus size={12} /> Add
                     </button>
                   ) : (
                     <div className="flex items-center justify-between">
                       <button onClick={() => dec(item.id)}
-                        className="w-7 h-7 rounded-full flex items-center justify-center"
-                        style={{ background: `${ORANGE}1a`, color: ORANGE }}>
+                        className="w-7 h-7 rounded-full flex items-center justify-center transition-transform active:scale-90"
+                        style={{ background: `${color}1a`, color }}>
                         <Minus size={11} />
                       </button>
                       <span className="font-bold text-sm" style={{ color: 'var(--text)' }}>{qty}</span>
                       <button onClick={() => add(item)} disabled={qty >= item.quantity}
-                        className="w-7 h-7 rounded-full flex items-center justify-center disabled:opacity-40"
-                        style={{ background: `${ORANGE}1a`, color: ORANGE }}>
+                        className="w-7 h-7 rounded-full flex items-center justify-center disabled:opacity-40 transition-transform active:scale-90"
+                        style={{ background: `${color}1a`, color }}>
                         <Plus size={11} />
                       </button>
                     </div>

@@ -52,7 +52,8 @@ public class OrdersController(AppDbContext db, ICurrentUserContext currentUser) 
             .Select(u => new { u.Id, u.FullName, u.Phone })
             .ToListAsync());
 
-    // Customer Portal has no login — orders are placed against the single demo store.
+    // Customer Portal has no login — the customer picks a nearby store first (see
+    // StoresController) and orders are placed against that store's id.
     [AllowAnonymous]
     [HttpPost]
     public async Task<IActionResult> Place(CreateOrderDto dto)
@@ -60,8 +61,9 @@ public class OrdersController(AppDbContext db, ICurrentUserContext currentUser) 
         if (dto.Items is null || dto.Items.Count == 0) return BadRequest(new { error = "Order must have at least one item" });
         if (string.IsNullOrWhiteSpace(dto.DeliveryAddress)) return BadRequest(new { error = "Delivery address is required" });
         if (dto.Items.Any(i => i.ItemId < 1 || i.Quantity < 1)) return BadRequest(new { error = "Invalid item or quantity" });
+        if (dto.StoreId < 1) return BadRequest(new { error = "A store must be selected" });
 
-        var store = await db.Stores.IgnoreQueryFilters().FirstOrDefaultAsync();
+        var store = await db.Stores.IgnoreQueryFilters().FirstOrDefaultAsync(s => s.Id == dto.StoreId);
         if (store is null) return BadRequest(new { error = "Store not found" });
 
         var saleItems = new List<SaleItem>();

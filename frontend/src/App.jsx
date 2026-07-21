@@ -266,7 +266,8 @@ function OwnerLayout({ onSwitch, role }) {
   const isOwner = role === 'Owner'
 
   return (
-    <div className="flex h-screen overflow-hidden" style={{ background: 'var(--bg)' }}>
+    <div className="flex h-screen overflow-hidden relative" style={{ background: 'var(--bg)' }}>
+      <GroceryBackdrop variant="subtle" fixed />
       <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} onSwitch={onSwitch} role={role} />
 
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
@@ -346,12 +347,26 @@ export default function App() {
     </>
   )
 
-  if (portal === 'rider') return (
-    <>
-      <Toaster position="top-right" toastOptions={TOAST_OPTS} />
-      <RiderPortal onSwitch={switchPortal} />
-    </>
-  )
+  if (portal === 'rider') {
+    if (!authed || auth.getRole() !== 'Rider') return (
+      <>
+        <Toaster position="top-right" toastOptions={TOAST_OPTS} />
+        <Login
+          onSuccess={() => setAuthed(true)}
+          requiredRole="Rider"
+          kicker="Rider Sign-in"
+          title="On the road"
+          subtitle="Sign in to see your deliveries"
+        />
+      </>
+    )
+    return (
+      <>
+        <Toaster position="top-right" toastOptions={TOAST_OPTS} />
+        <RiderPortal onSwitch={switchPortal} />
+      </>
+    )
+  }
 
   if (!authed && authMode === 'signup') return (
     <>

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { CheckCircle, Clock, ChevronRight, MapPin, Package } from 'lucide-react'
 import { fetchOrders, advanceOrder, STEPS } from '../store/orderStore'
 import toast from 'react-hot-toast'
+import GroceryBackdrop from '../components/GroceryBackdrop'
 
 const STATUS_KEY = { Pending: 'pending', Confirmed: 'confirmed', PickedUp: 'picked_up', OnTheWay: 'on_the_way', Delivered: 'delivered' }
 function toOrderState(sale) {
@@ -70,7 +71,8 @@ export default function RiderPortal({ onSwitch }) {
   ]
 
   return (
-    <div className="min-h-screen" style={{ background: 'var(--bg)' }}>
+    <div className="min-h-screen relative" style={{ background: 'var(--bg)' }}>
+      <GroceryBackdrop variant="subtle" fixed />
       {/* Header */}
       <div className="sticky top-0 z-20"
         style={{ background: 'var(--surface)', borderBottom: '1px solid var(--border)' }}>

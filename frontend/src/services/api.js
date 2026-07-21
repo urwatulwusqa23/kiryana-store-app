@@ -106,3 +106,9 @@ export const expenseApi = {
   update: (id, data) => api.put(`/expenses/${id}`, data).then(r => r.data),
   delete: id => api.delete(`/expenses/${id}`)
 }
+
+export const storeApi = {
+  getNearby: (lat, lng) => api.get('/stores/nearby', { params: { lat, lng } }).then(r => r.data),
+  getById: id => api.get(`/stores/${id}`).then(r => r.data),
+  getItems: id => api.get(`/stores/${id}/items`).then(r => r.data),
+}

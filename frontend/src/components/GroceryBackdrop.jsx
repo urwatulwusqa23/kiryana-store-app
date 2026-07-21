@@ -23,9 +23,13 @@ const ITEMS = [
   { Icon: Banana,       top: '88%', left: '88%', size: 34, color: '#e0a72c', bg: '#fbf1dc', dur: '15s', delay: '1.2s', depth: 40 },
 ]
 
-export default function GroceryBackdrop() {
-  const ref = useRef(null)
+// variant="hero"   — full-size, full-opacity, for standalone entry screens (Login, Signup, portal landings).
+// variant="subtle" — smaller/fewer/lower-opacity, meant to sit fixed behind data-dense pages (Dashboard, Inventory, ...)
+//                     without competing with tables/charts for attention.
+export default function GroceryBackdrop({ variant = 'hero', fixed = false }) {
   const [mouse, setMouse] = useState({ x: 0, y: 0 })
+  const subtle = variant === 'subtle'
+  const items = subtle ? ITEMS.filter((_, i) => i % 2 === 0) : ITEMS
 
   useEffect(() => {
     function onMove(e) {
@@ -37,27 +41,32 @@ export default function GroceryBackdrop() {
   }, [])
 
   return (
-    <div ref={ref} className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
-      {ITEMS.map(({ Icon, top, left, size, color, bg, dur, delay, depth }, i) => (
-        <div key={i}
-          className="absolute"
-          style={{
-            top, left,
-            transform: `translate(${mouse.x * depth}px, ${mouse.y * depth}px)`,
-            transition: 'transform 0.35s ease-out',
-          }}>
-          <div className="grocery-float rounded-full flex items-center justify-center"
+    <div className={`${fixed ? 'fixed' : 'absolute'} inset-0 overflow-hidden pointer-events-none`}
+      style={{ opacity: subtle ? 0.45 : 1, zIndex: fixed ? 0 : undefined }}
+      aria-hidden="true">
+      {items.map(({ Icon, top, left, size, color, bg, dur, delay, depth }, i) => {
+        const s = subtle ? Math.round(size * 0.7) : size
+        return (
+          <div key={i}
+            className="absolute"
             style={{
-              width: size + 26, height: size + 26,
-              background: bg,
-              boxShadow: '0 4px 14px rgba(44,36,22,0.08)',
-              animationDuration: dur,
-              animationDelay: delay,
+              top, left,
+              transform: `translate(${mouse.x * depth}px, ${mouse.y * depth}px)`,
+              transition: 'transform 0.35s ease-out',
             }}>
-            <Icon size={size} color={color} strokeWidth={1.75} />
+            <div className="grocery-float rounded-full flex items-center justify-center"
+              style={{
+                width: s + (subtle ? 18 : 26), height: s + (subtle ? 18 : 26),
+                background: bg,
+                boxShadow: subtle ? 'none' : '0 4px 14px rgba(44,36,22,0.08)',
+                animationDuration: dur,
+                animationDelay: delay,
+              }}>
+              <Icon size={s} color={color} strokeWidth={1.75} />
+            </div>
           </div>
-        </div>
-      ))}
+        )
+      })}
     </div>
   )
 }

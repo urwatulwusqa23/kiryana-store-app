@@ -83,8 +83,9 @@ function setCustomerRef(ref) {
   if (ref) localStorage.setItem(CUSTOMER_REF_KEY, ref)
 }
 
-export async function placeOrder({ customerName, address, items }) {
+export async function placeOrder({ storeId, customerName, address, items }) {
   const sale = await orderApi.place({
+    storeId,
     customerName,
     deliveryAddress: address,
     items,
