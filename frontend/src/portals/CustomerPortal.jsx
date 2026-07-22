@@ -13,6 +13,7 @@ import GroceryBackdrop from '../components/GroceryBackdrop'
 import { categorize } from '../utils/productCategory'
 
 const SELECTED_STORE_KEY = 'k_selected_store'
+const cartKey = storeId => `k_cart_${storeId}`
 
 const STATUS_KEY = { Pending: 'pending', Confirmed: 'confirmed', PickedUp: 'picked_up', OnTheWay: 'on_the_way', Delivered: 'delivered' }
 function toOrderState(sale) {
@@ -40,11 +41,21 @@ export default function CustomerPortal({ onSwitch }) {
   const [store, setStore]       = useState(() => {
     try { return JSON.parse(localStorage.getItem(SELECTED_STORE_KEY) || 'null') } catch { return null }
   })
+  const [cart, setCart] = useState(() => {
+    if (!store) return {}
+    try { return JSON.parse(localStorage.getItem(cartKey(store.id)) || '{}') } catch { return {} }
+  })
+
+  useEffect(() => {
+    if (!store) return
+    localStorage.setItem(cartKey(store.id), JSON.stringify(cart))
+  }, [cart, store])
 
   function goTrack(saleId) { setTrackId(saleId); setTab('track') }
 
   function selectStore(s) {
     localStorage.setItem(SELECTED_STORE_KEY, JSON.stringify(s))
+    try { setCart(JSON.parse(localStorage.getItem(cartKey(s.id)) || '{}')) } catch { setCart({}) }
     setStore(s)
   }
 
@@ -107,7 +118,7 @@ export default function CustomerPortal({ onSwitch }) {
       </div>
 
       <div className="max-w-lg mx-auto pb-28">
-        {tab === 'browse' && <BrowseStore store={store} onOrderPlaced={goTrack} />}
+        {tab === 'browse' && <BrowseStore store={store} onOrderPlaced={goTrack} cart={cart} setCart={setCart} />}
         {tab === 'orders' && <MyOrders   onTrack={goTrack} />}
         {tab === 'track'  && <TrackOrder saleId={trackId} />}
       </div>
@@ -226,10 +237,9 @@ function StorePicker({ onSelect, onSwitch }) {
 }
 
 /* ─── Browse Store ───────────────────────────────────────────── */
-function BrowseStore({ store, onOrderPlaced }) {
+function BrowseStore({ store, onOrderPlaced, cart, setCart }) {
   const [items,        setItems]        = useState([])
   const [loading,      setLoading]      = useState(true)
-  const [cart,         setCart]         = useState({})
   const [customerName, setCustomerName] = useState('')
   const [address,      setAddress]      = useState('')
   const [view,         setView]         = useState('shop')
